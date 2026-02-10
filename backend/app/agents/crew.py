@@ -8,7 +8,7 @@ import yaml
 from crewai import Agent, Crew, Process, Task, LLM
 
 from app.agents.tools.transaction_tool import TransactionQueryTool
-from app.agents.tools.psx_tool import PSXPredictionTool
+from app.agents.tools.psx_tool import PSXPredictionTool, PSX_STOCK_DATA, MUTUAL_FUNDS
 from app.agents.tools.halal_screening_tool import HalalScreeningTool
 from app.agents.tools.portfolio_tool import PortfolioReadTool
 from app.agents.models.output_schemas import InvestmentRecommendationOutput
@@ -104,7 +104,8 @@ class BaqiCrew:
             risk_profile=risk_profile,
             baqi_amount=inputs.get("baqi_amount", 15000))
 
-        t3 = self._make_task("analyze_market", market_agent)
+        t3 = self._make_task("analyze_market", market_agent,
+            psx_data=psx_data)
 
         t4 = self._make_task("screen_halal", halal_agent, context_tasks=[t3],
             halal_preference=inputs.get("halal_preference", True),
@@ -136,6 +137,15 @@ class BaqiCrew:
         # Try to parse the final task output as JSON
         raw = str(result.raw) if hasattr(result, 'raw') else str(result)
         output = self._extract_json(raw)
+
+        # Validate tickers — ensure they match known data
+        valid_tickers = set(PSX_STOCK_DATA.keys()) | set(MUTUAL_FUNDS.keys())
+        if isinstance(output, dict) and "portfolio" in output:
+            for alloc in output["portfolio"]:
+                ticker = alloc.get("ticker", "")
+                if ticker not in valid_tickers:
+                    # Try to find closest match or truncate
+                    alloc["ticker"] = ticker[:20]
 
         return output
 

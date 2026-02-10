@@ -59,12 +59,13 @@ async def generate_recommendation(user_id: int) -> dict:
     # 6. Save recommendation to Supabase if it has portfolio data
     if isinstance(result, dict) and "portfolio" in result:
         for alloc in result["portfolio"]:
+            ticker = alloc.get("ticker", "")[:30]  # Truncate to fit DB column
             supabase.table("investments").insert({
                 "user_id": user_id,
                 "investment_date": None,  # Not executed yet
                 "asset_type": alloc.get("asset_type", "stock"),
-                "asset_name": alloc.get("asset_name", ""),
-                "ticker": alloc.get("ticker", ""),
+                "asset_name": alloc.get("asset_name", "")[:100],
+                "ticker": ticker,
                 "amount": alloc.get("amount_pkr", 0),
                 "quantity": 0,
                 "purchase_price": 0,

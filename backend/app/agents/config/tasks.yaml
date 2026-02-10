@@ -36,14 +36,28 @@ assess_risk:
 
 analyze_market:
   description: >
-    Assess current PSX market conditions for Pakistani investors.
-    Consider KSE-100 trends, SBP policy rate, inflation, and sector performance.
-    Identify the top 3-5 sectors for investment right now.
-    Flag any major risks.
+    Analyze the PSX market data provided below for Pakistani investors.
+    Use ONLY the data provided — do NOT invent statistics, index values,
+    or policy rates not present in the data.
+
+    PSX Stock Data (from BAQI Data Engine):
+    {psx_data}
+
+    Based on this data:
+    - Identify the top 3-5 sectors by predicted return
+    - Note the price-to-earnings ratios to flag overvalued stocks
+    - Assess overall market conditions based on the spread of predicted returns
+    - Flag risks (e.g. high PE ratios, concentrated sector exposure)
+    - Identify opportunities (e.g. undervalued stocks with strong returns)
+
+    IMPORTANT: Base your analysis ONLY on the data above.
+    Do NOT fabricate KSE-100 index values, SBP rates, or inflation figures.
   expected_output: >
     A JSON object with keys: market_outlook (bullish/neutral/bearish),
-    kse100_trend (string), top_sectors (list of strings),
-    risks (list of strings), opportunities (list of strings).
+    analysis_basis (string saying "Based on BAQI Data Engine stock predictions"),
+    top_sectors (list of strings ranked by average predicted return),
+    risks (list of strings based on actual PE ratios and data),
+    opportunities (list of strings citing specific tickers and their predicted returns).
   agent: market_sentiment
 
 screen_halal:
@@ -72,8 +86,12 @@ generate_recommendation:
     Halal screened stocks: {halal_stocks}
 
     Construct a portfolio with 4-6 specific allocations.
-    Each allocation must have: asset_name, ticker, asset_type (stock/mutual_fund/fixed_income),
-    amount_pkr, percentage, expected_return (annual), is_halal, and rationale.
+    CRITICAL: You MUST only use tickers that appear in the PSX stock predictions
+    or halal screened stocks data above. Do NOT invent ticker symbols.
+    Valid stock tickers include: LUCK, SYS, ENGRO, FFC, OGDC, PPL, MARI, SEARL, TRG, EFERT, FCCL, MEBL, UBL, HBL, DGKC, HUBC, PSO, NESTLE, COLG, UNITY.
+    Valid mutual fund tickers include: ALMEEZAN_EQUITY, NBP_STOCK, HBL_ISLAMIC, ALMEEZAN_INCOME, NBP_INCOME.
+    Each allocation must have: asset_name, ticker (from the list above), asset_type (stock/mutual_fund/fixed_income),
+    amount_pkr, percentage, expected_return (annual, from the provided data), is_halal, and rationale.
     Include a one-paragraph summary explaining the overall strategy.
   expected_output: >
     A JSON object with keys: portfolio (list of allocation objects),

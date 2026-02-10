@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { PieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts'
-import { Card } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { baqiApi } from '@/api/client'
@@ -10,7 +10,7 @@ import { formatPKR } from '@/lib/utils'
 import type { SpendingAnalysis, User } from '@/types'
 import {
   TrendingUp, Wallet, PiggyBank, AlertTriangle, Sparkles, ArrowRight, Bot,
-  Loader2
+  Loader2, ArrowUpRight
 } from 'lucide-react'
 
 export default function Dashboard() {
@@ -67,14 +67,14 @@ export default function Dashboard() {
   // Onboarding state — no user yet
   if (!userId || !analysis) {
     return (
-      <div className="flex flex-col items-center justify-center h-[70vh] text-center">
+      <div className="flex flex-col items-center justify-center h-[70vh] text-center animate-fade-in-up">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.6 }}
           className="mb-8"
         >
-          <div className="w-24 h-24 rounded-2xl bg-primary/10 flex items-center justify-center glow-green animate-float mx-auto mb-6">
+          <div className="w-24 h-24 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6 animate-float">
             <Bot className="w-12 h-12 text-primary" />
           </div>
           <h1 className="text-4xl font-bold mb-3">
@@ -95,7 +95,7 @@ export default function Dashboard() {
             size="lg"
             onClick={handleDemo}
             disabled={demoLoading}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-6 text-lg rounded-xl glow-green"
+            className="font-semibold px-8 py-6 text-lg rounded-xl shadow-lg shadow-primary/20"
           >
             {demoLoading ? (
               <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Setting up demo...</>
@@ -124,55 +124,105 @@ export default function Dashboard() {
     month: m.month.slice(0, 7),
   }))
 
+  const stats = [
+    { label: 'Total Income', value: formatPKR(analysis.total_income), icon: Wallet, color: 'bg-blue-50 text-blue-600', change: '6 months' },
+    { label: 'Total Spending', value: formatPKR(analysis.total_spending), icon: AlertTriangle, color: 'bg-amber-50 text-amber-600', change: `${(100 - analysis.savings_rate).toFixed(1)}%` },
+    { label: 'Savings Rate', value: `${analysis.savings_rate.toFixed(1)}%`, icon: PiggyBank, color: 'bg-purple-50 text-purple-600', change: 'of income' },
+    { label: 'Monthly BAQI', value: formatPKR(analysis.baqi_amount / 6), icon: TrendingUp, color: 'bg-emerald-50 text-emerald-600', change: 'investable' },
+  ]
+
   return (
-    <div className="space-y-6">
-      {/* Welcome */}
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-2xl font-bold">
-          Welcome back, <span className="text-gradient">{user?.name || 'User'}</span>
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          Here's your financial overview — {user?.risk_profile} risk profile
-        </p>
-      </motion.div>
+    <div className="space-y-8 animate-fade-in-up">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Welcome back, <span className="text-gradient">{user?.name || 'User'}</span>
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Here's your financial overview — {user?.risk_profile || 'moderate'} risk profile
+          </p>
+        </div>
+      </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {[
-          { label: 'Total Income', value: formatPKR(analysis.total_income), icon: Wallet, color: 'text-blue-400' },
-          { label: 'Total Spending', value: formatPKR(analysis.total_spending), icon: AlertTriangle, color: 'text-amber-400' },
-          { label: 'Savings Rate', value: `${analysis.savings_rate.toFixed(1)}%`, icon: PiggyBank, color: 'text-purple-400' },
-          { label: 'Monthly BAQI', value: formatPKR(analysis.baqi_amount / 6), icon: TrendingUp, color: 'text-emerald-400' },
-        ].map((stat, i) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {stats.map((stat, i) => (
           <motion.div
             key={stat.label}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
           >
-            <Card className="p-4 bg-card border-border/50 hover:border-primary/30 transition-all">
-              <stat.icon className={`w-5 h-5 ${stat.color} mb-2`} />
-              <p className="text-xs text-muted-foreground">{stat.label}</p>
-              <p className="text-lg font-bold">{stat.value}</p>
+            <Card className="card-soft">
+              <CardContent className="p-0 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${stat.color}`}>
+                    <stat.icon className="w-5 h-5" />
+                  </div>
+                  <Badge variant="secondary" className="bg-muted text-muted-foreground text-xs">
+                    {stat.change}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground font-medium">{stat.label}</p>
+                  <h3 className="text-2xl font-bold mt-0.5">{stat.value}</h3>
+                </div>
+              </CardContent>
             </Card>
           </motion.div>
         ))}
       </div>
 
       {/* Charts Row */}
-      <div className="grid lg:grid-cols-2 gap-4">
-        {/* Spending Pie */}
-        <Card className="p-5 bg-card border-border/50">
-          <h3 className="font-semibold mb-4">Spending Breakdown</h3>
-          <div className="flex items-center">
-            <ResponsiveContainer width="50%" height={180}>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Monthly Trend — 2 col */}
+        <Card className="card-soft lg:col-span-2 overflow-hidden">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-semibold">Monthly Income vs Spending</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[280px] w-full mt-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={monthlyData}>
+                  <defs>
+                    <linearGradient id="green" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.15} />
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="red" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#ef4444" stopOpacity={0.15} />
+                      <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={(v: any) => `${(v/1000).toFixed(0)}k`} />
+                  <Tooltip
+                    contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', background: '#fff' }}
+                    formatter={(val: any) => formatPKR(Number(val))}
+                  />
+                  <Area type="monotone" dataKey="income" stroke="#10b981" strokeWidth={2} fill="url(#green)" />
+                  <Area type="monotone" dataKey="spending" stroke="#ef4444" strokeWidth={2} fill="url(#red)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Spending Breakdown Pie */}
+        <Card className="card-soft">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-semibold">Spending Breakdown</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={160}>
               <PieChart>
                 <Pie
                   data={pieData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={50}
-                  outerRadius={75}
+                  innerRadius={45}
+                  outerRadius={65}
                   paddingAngle={3}
                   dataKey="value"
                 >
@@ -182,44 +232,16 @@ export default function Dashboard() {
                 </Pie>
               </PieChart>
             </ResponsiveContainer>
-            <div className="flex-1 space-y-2">
+            <div className="space-y-2 mt-2">
               {pieData.map(d => (
                 <div key={d.name} className="flex items-center gap-2 text-sm">
                   <div className="w-3 h-3 rounded-full" style={{ background: d.color }} />
                   <span className="text-muted-foreground">{d.name}</span>
-                  <span className="ml-auto font-medium">{d.value.toFixed(1)}%</span>
+                  <span className="ml-auto font-semibold">{d.value.toFixed(1)}%</span>
                 </div>
               ))}
             </div>
-          </div>
-        </Card>
-
-        {/* Monthly Trend */}
-        <Card className="p-5 bg-card border-border/50">
-          <h3 className="font-semibold mb-4">Monthly Trend</h3>
-          <ResponsiveContainer width="100%" height={180}>
-            <AreaChart data={monthlyData}>
-              <defs>
-                <linearGradient id="green" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="red" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94a3b8' }} />
-              <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} tickFormatter={v => `${(v/1000).toFixed(0)}k`} />
-              <Tooltip
-                contentStyle={{ background: '#111118', border: '1px solid #1e293b', borderRadius: '8px' }}
-                labelStyle={{ color: '#94a3b8' }}
-                formatter={(val: any) => formatPKR(Number(val))}
-              />
-              <Area type="monotone" dataKey="income" stroke="#10b981" fill="url(#green)" />
-              <Area type="monotone" dataKey="spending" stroke="#ef4444" fill="url(#red)" />
-            </AreaChart>
-          </ResponsiveContainer>
+          </CardContent>
         </Card>
       </div>
 
@@ -230,23 +252,26 @@ export default function Dashboard() {
         transition={{ delay: 0.5 }}
       >
         <Card
-          className="p-6 border-gradient cursor-pointer hover:scale-[1.01] transition-transform"
+          className="card-soft bg-primary text-primary-foreground relative overflow-hidden border-none shadow-xl shadow-primary/20 cursor-pointer hover:scale-[1.01] transition-transform"
           onClick={() => navigate('/invest')}
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <Badge variant="secondary" className="mb-2 bg-primary/10 text-primary border-primary/20">
-                AI-Powered
-              </Badge>
-              <h3 className="text-xl font-bold mb-1">Generate Investment Recommendation</h3>
-              <p className="text-sm text-muted-foreground">
-                Watch 5 AI agents collaborate live to build your personalized portfolio
-              </p>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32" />
+          <CardContent className="pt-6 relative z-10">
+            <div className="flex items-center justify-between">
+              <div>
+                <Badge variant="secondary" className="mb-2 bg-white/20 text-white border-white/20">
+                  AI-Powered
+                </Badge>
+                <h3 className="text-xl font-bold mb-1">Generate Investment Recommendation</h3>
+                <p className="text-sm text-blue-100">
+                  Watch 5 AI agents collaborate live to build your personalized Shariah-compliant portfolio
+                </p>
+              </div>
+              <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center shrink-0 ml-4">
+                <ArrowRight className="w-7 h-7 text-white" />
+              </div>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center glow-green">
-              <ArrowRight className="w-6 h-6 text-primary" />
-            </div>
-          </div>
+          </CardContent>
         </Card>
       </motion.div>
     </div>

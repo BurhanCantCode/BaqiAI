@@ -25,7 +25,7 @@ const AGENT_CONFIGS: Omit<AgentStep, 'status' | 'output' | 'streamedText'>[] = [
   {
     id: 'market',
     name: 'Market Analyst',
-    role: 'Analyzing KSE-100 trends, SBP rates, and sector performance...',
+    role: 'Analyzing PSX stock data from BAQI Data Engine...',
     icon: 'TrendingUp',
     color: '#06b6d4',
   },
@@ -63,12 +63,12 @@ const SIMULATED_STREAMS: Record<string, string[]> = {
     'Time horizon compatible with growth-oriented PSX investments',
   ],
   market: [
-    'KSE-100 Index: 82,450 (+12.3% YTD) — BULLISH outlook',
-    'SBP policy rate: 13% (cut from 22%) — positive for equities',
-    'PKR/USD: 278.5 — stabilized after IMF program extension',
-    'Top performing sectors: Technology (+34%), Cement (+22%), Oil & Gas (+18%)',
-    'Risk factors: global commodity prices, political uncertainty',
-    'Opportunity: Infrastructure spending boost under CPEC Phase II',
+    'Loading PSX stock data from BAQI Data Engine...',
+    'Analyzing 20 KSE-100 stocks: predicted returns range 4–15%',
+    'Top sectors by return: Technology (SYS +12%, TRG +15%), Oil & Gas (MARI +10%)',
+    'Low PE opportunities: PSO (3.9), PPL (4.8), OGDC (5.2) — value plays',
+    'Risk flags: NESTLE PE 28.5, TRG PE 25.0 — premium valuations',
+    'Market outlook: BULLISH based on broad positive predicted returns',
   ],
   halal: [
     'Screening against KMI-30 Shariah compliance criteria...',
@@ -192,7 +192,7 @@ export default function AgentPipeline({ isRunning, onComplete }: AgentPipelinePr
               {idx < agents.length - 1 && (
                 <div className="absolute left-6 ml-[1px] h-3 w-px" style={{
                   top: `calc(${idx * 100}% + 3rem)`,
-                  background: isDone ? agent.color : '#1e293b',
+                  background: isDone ? agent.color : '#e2e8f0',
                   transition: 'background 0.5s',
                 }} />
               )}
@@ -264,7 +264,7 @@ export default function AgentPipeline({ isRunning, onComplete }: AgentPipelinePr
                       transition={{ duration: 0.3 }}
                       className="overflow-hidden"
                     >
-                      <div className="mt-2 rounded-lg bg-background/50 p-3 font-mono text-xs leading-relaxed">
+                      <div className="mt-2 rounded-lg bg-muted/50 p-3 font-mono text-xs leading-relaxed">
                         {isDone ? (
                           agent.output.split('\n').map((line, i) => (
                             <motion.div
@@ -280,7 +280,7 @@ export default function AgentPipeline({ isRunning, onComplete }: AgentPipelinePr
                         ) : (
                           <div>
                             {agent.streamedText.split('\n').map((line, i) => (
-                              <div key={i} className="text-emerald-400/90">
+                              <div key={i} className="text-foreground/80">
                                 {line && <span className="text-primary/40 mr-2">{'>'}</span>}
                                 {line}
                               </div>

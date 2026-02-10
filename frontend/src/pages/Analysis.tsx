@@ -149,7 +149,7 @@ export default function Analysis() {
             <XAxis type="number" tick={{ fontSize: 11, fill: '#94a3b8' }} tickFormatter={v => `${(v/1000).toFixed(0)}k`} />
             <YAxis dataKey="merchant" type="category" tick={{ fontSize: 11, fill: '#94a3b8' }} width={80} />
             <Tooltip
-              contentStyle={{ background: '#111118', border: '1px solid #1e293b', borderRadius: '8px' }}
+              contentStyle={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}
               formatter={(val: any) => formatPKR(Number(val))}
             />
             <Bar dataKey="total" radius={[0, 4, 4, 0]}>

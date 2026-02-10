@@ -130,9 +130,9 @@ export default function Invest() {
 
               <div className="flex items-center justify-center gap-4 mt-6 text-xs text-muted-foreground">
                 <span>5 AI Agents</span>
-                <span className="text-border">|</span>
+                <span className="text-muted-foreground/50">|</span>
                 <span>30-90 seconds</span>
-                <span className="text-border">|</span>
+                <span className="text-muted-foreground/50">|</span>
                 <span>100% Halal</span>
               </div>
             </>
@@ -233,7 +233,7 @@ export default function Invest() {
                           </div>
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <span>{alloc.ticker}</span>
-                            <span className="text-border">|</span>
+                            <span className="text-muted-foreground/50">|</span>
                             <span className="capitalize">{alloc.asset_type.replace('_', ' ')}</span>
                           </div>
                         </div>

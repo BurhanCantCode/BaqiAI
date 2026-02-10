@@ -1,8 +1,13 @@
+import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import {
-  LayoutDashboard, TrendingUp, Briefcase, BarChart3, Bot, Bell, Search, Settings, Brain
+  LayoutDashboard, TrendingUp, Briefcase, BarChart3, Bot, Bell, Search, Settings, Brain,
+  FileSpreadsheet
 } from 'lucide-react'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
+import UploadCSV from '@/components/UploadCSV'
+import { useApp } from '@/context/AppContext'
 
 const NAV_ITEMS = [
   { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -14,6 +19,14 @@ const NAV_ITEMS = [
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation()
+  const { userId, switchDataSource } = useApp()
+  const [showUploadModal, setShowUploadModal] = useState(false)
+
+  const handleUploadComplete = async (uploadData: any) => {
+    setShowUploadModal(false)
+    const uploadUserId = uploadData.user_id || 1
+    switchDataSource('csv', uploadUserId)
+  }
 
   return (
     <div className="min-h-screen bg-background flex font-sans text-foreground">
@@ -46,16 +59,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     : 'text-[#8A8878] hover:text-[#D4C9A8]'
                 )}
               >
-                {/* Active indicator — glowing bar */}
                 {isActive && (
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-[#A3B570] shadow-[0_0_8px_rgba(163,181,112,0.5)]" />
                 )}
-
-                {/* Active background */}
                 {isActive && (
                   <div className="absolute inset-0 rounded-lg bg-[#A3B570]/8" />
                 )}
-
                 <Icon className={cn(
                   'w-[18px] h-[18px] relative z-10 transition-colors',
                   isActive ? 'text-[#A3B570]' : 'text-[#8A8878] group-hover:text-[#A3B570]/70'
@@ -67,7 +76,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </nav>
 
         {/* Bottom Actions */}
-        <div className="px-3 py-4 border-t border-[#333D30]/50">
+        <div className="px-3 py-4 border-t border-[#333D30]/50 space-y-1">
+          {/* Upload CSV — always accessible */}
+          <button
+            onClick={() => setShowUploadModal(true)}
+            className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-[#A3B570] hover:bg-[#A3B570]/10 transition-all duration-200 group"
+          >
+            <FileSpreadsheet className="w-[18px] h-[18px] group-hover:scale-110 transition-transform" />
+            <span className="text-sm font-medium">Upload CSV</span>
+          </button>
+
           <button className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-[#8A8878] hover:text-[#D4C9A8] transition-all duration-200">
             <Settings className="w-[18px] h-[18px]" />
             <span className="text-sm">Settings</span>
@@ -82,7 +100,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <div />
 
           <div className="flex items-center gap-3">
-            {/* Search */}
             <div className="relative hidden md:block">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8A8878]" />
               <input
@@ -92,13 +109,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               />
             </div>
 
-            {/* Notifications */}
             <button className="w-9 h-9 rounded-lg bg-[#232B22] border border-[#333D30] flex items-center justify-center text-[#8A8878] hover:text-[#A3B570] transition-colors relative">
               <Bell className="w-4 h-4" />
               <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#C65D4A]" />
             </button>
 
-            {/* User Avatar */}
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#A3B570] to-[#6B7D3A] p-[2px] cursor-pointer">
               <div className="w-full h-full rounded-[6px] bg-[#232B22] flex items-center justify-center overflow-hidden">
                 <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User" className="w-full h-full" />
@@ -112,6 +127,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           {children}
         </div>
       </main>
+
+      {/* Upload CSV Modal — accessible from any page */}
+      <Dialog open={showUploadModal} onOpenChange={setShowUploadModal}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-card border-border">
+          <UploadCSV
+            userId={userId || undefined}
+            onUploadComplete={handleUploadComplete}
+            onCancel={() => setShowUploadModal(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

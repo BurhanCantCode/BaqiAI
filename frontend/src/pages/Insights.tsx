@@ -1,8 +1,11 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useApp } from '@/context/AppContext'
+import { SpotlightCard } from '@/components/ui/spotlight-card'
+import { GlowingBorder } from '@/components/ui/glowing-border'
+import { MovingBorderButton } from '@/components/ui/moving-border'
+import { Meteors } from '@/components/ui/meteors'
 import type { InsightItem } from '@/types'
 import {
   Brain, PiggyBank, AlertTriangle, TrendingUp, Target, User2,
@@ -10,19 +13,19 @@ import {
 } from 'lucide-react'
 
 const CATEGORY_CONFIG: Record<string, { icon: typeof Brain; color: string; label: string }> = {
-  behavioral: { icon: Brain, color: '#8b5cf6', label: 'Behavioral' },
-  saving_opportunity: { icon: PiggyBank, color: '#10b981', label: 'Savings' },
-  anomaly: { icon: AlertTriangle, color: '#ef4444', label: 'Anomaly' },
-  trend: { icon: TrendingUp, color: '#3b82f6', label: 'Trend' },
-  optimization: { icon: Target, color: '#06b6d4', label: 'Optimize' },
-  lifestyle: { icon: Coffee, color: '#f59e0b', label: 'Lifestyle' },
-  personality: { icon: User2, color: '#ec4899', label: 'Personality' },
+  behavioral: { icon: Brain, color: '#A3B570', label: 'Behavioral' },
+  saving_opportunity: { icon: PiggyBank, color: '#8A9E5C', label: 'Savings' },
+  anomaly: { icon: AlertTriangle, color: '#C65D4A', label: 'Anomaly' },
+  trend: { icon: TrendingUp, color: '#6B7D3A', label: 'Trend' },
+  optimization: { icon: Target, color: '#D4C9A8', label: 'Optimize' },
+  lifestyle: { icon: Coffee, color: '#A3B570', label: 'Lifestyle' },
+  personality: { icon: User2, color: '#D4C9A8', label: 'Personality' },
 }
 
 const SEVERITY_CONFIG: Record<InsightItem['severity'], { bg: string; border: string; text: string }> = {
-  info: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700' },
-  warning: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700' },
-  opportunity: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700' },
+  info: { bg: 'bg-[#A3B570]/5', border: 'border-[#A3B570]/20', text: 'text-[#A3B570]' },
+  warning: { bg: 'bg-[#D4C9A8]/5', border: 'border-[#D4C9A8]/20', text: 'text-[#D4C9A8]' },
+  opportunity: { bg: 'bg-[#6B7D3A]/10', border: 'border-[#6B7D3A]/20', text: 'text-[#A3B570]' },
 }
 
 export default function Insights() {
@@ -38,12 +41,12 @@ export default function Insights() {
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
         <div className="flex items-center gap-2 mb-1">
-          <Zap className="w-5 h-5 text-primary" />
+          <Zap className="w-5 h-5 text-[#A3B570]" />
           <h1 className="text-2xl font-bold">
             <span className="text-gradient">Data Exhaust Insights</span>
           </h1>
         </div>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-[#8A8878] text-sm">
           AI-discovered personality traits and behavioral patterns from your transaction data
         </p>
       </motion.div>
@@ -53,43 +56,40 @@ export default function Insights() {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="text-center py-12"
+          className="text-center py-12 relative"
         >
-          <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center glow-green mx-auto mb-6 animate-float">
-            <Brain className="w-10 h-10 text-primary" />
+          <Meteors count={10} />
+          <div className="w-20 h-20 rounded-2xl bg-[#A3B570]/10 flex items-center justify-center glow-sage mx-auto mb-6 animate-float relative z-10">
+            <Brain className="w-10 h-10 text-[#A3B570]" />
           </div>
 
           {!dataSource ? (
-            <div>
-              <h2 className="text-xl font-bold mb-2">No Data Source Selected</h2>
-              <p className="text-muted-foreground mb-4">Go to Dashboard and choose a data source first</p>
+            <div className="relative z-10">
+              <h2 className="text-xl font-bold mb-2 text-[#E8E4DA]">No Data Source Selected</h2>
+              <p className="text-[#8A8878] mb-4">Go to Dashboard and choose a data source first</p>
             </div>
           ) : (
-            <>
-              <h2 className="text-xl font-bold mb-2">Who Are You, Really?</h2>
-              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+            <div className="relative z-10">
+              <h2 className="text-xl font-bold mb-2 text-[#E8E4DA]">Who Are You, Really?</h2>
+              <p className="text-[#8A8878] mb-6 max-w-md mx-auto">
                 Our AI scans your real transaction data to build a financial personality profile,
                 detect geographic patterns, uncover hidden habits, and reveal things about you
                 that you can't see yourself.
               </p>
 
-              <Button
-                size="lg"
-                onClick={fetchInsights}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-6 text-lg rounded-xl glow-green"
-              >
-                <Sparkles className="w-5 h-5 mr-2" />
+              <MovingBorderButton onClick={fetchInsights} className="text-[#E8E4DA] font-semibold px-8 py-4 text-lg">
+                <Sparkles className="w-5 h-5 mr-2 inline" />
                 Analyze My Data Exhaust
-              </Button>
+              </MovingBorderButton>
 
-              <div className="flex items-center justify-center gap-4 mt-6 text-xs text-muted-foreground">
+              <div className="flex items-center justify-center gap-4 mt-6 text-xs text-[#8A8878]">
                 <span>14 Signal Types</span>
-                <span className="text-muted-foreground/50">|</span>
+                <span className="text-[#333D30]">|</span>
                 <span>3,000+ Transactions</span>
-                <span className="text-muted-foreground/50">|</span>
+                <span className="text-[#333D30]">|</span>
                 <span>AI-Powered</span>
               </div>
-            </>
+            </div>
           )}
         </motion.div>
       )}
@@ -101,19 +101,15 @@ export default function Insights() {
           animate={{ opacity: 1, scale: 1 }}
           className="text-center py-12"
         >
-          <div className="w-20 h-20 rounded-2xl bg-destructive/10 flex items-center justify-center mx-auto mb-6">
-            <AlertTriangle className="w-10 h-10 text-destructive" />
+          <div className="w-20 h-20 rounded-2xl bg-[#C65D4A]/10 flex items-center justify-center mx-auto mb-6">
+            <AlertTriangle className="w-10 h-10 text-[#C65D4A]" />
           </div>
-          <h2 className="text-xl font-bold mb-2">Something Went Wrong</h2>
-          <p className="text-muted-foreground mb-6 max-w-md mx-auto text-sm">{insightsError}</p>
-          <Button
-            size="lg"
-            onClick={fetchInsights}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-6 text-lg rounded-xl"
-          >
-            <Sparkles className="w-5 h-5 mr-2" />
+          <h2 className="text-xl font-bold mb-2 text-[#E8E4DA]">Something Went Wrong</h2>
+          <p className="text-[#8A8878] mb-6 max-w-md mx-auto text-sm">{insightsError}</p>
+          <MovingBorderButton onClick={fetchInsights} className="text-[#E8E4DA] font-semibold px-8 py-4 text-lg">
+            <Sparkles className="w-5 h-5 mr-2 inline" />
             Try Again
-          </Button>
+          </MovingBorderButton>
         </motion.div>
       )}
 
@@ -124,10 +120,10 @@ export default function Insights() {
           animate={{ opacity: 1 }}
           className="text-center py-12"
         >
-          <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
-            <Loader2 className="w-10 h-10 text-primary animate-spin" />
+          <div className="w-20 h-20 rounded-2xl bg-[#A3B570]/10 flex items-center justify-center mx-auto mb-6 animate-glow-pulse">
+            <Loader2 className="w-10 h-10 text-[#A3B570] animate-spin" />
           </div>
-          <h2 className="text-xl font-bold mb-3">Scanning Your Data Exhaust</h2>
+          <h2 className="text-xl font-bold mb-3 text-[#E8E4DA]">Scanning Your Data Exhaust</h2>
           <div className="max-w-sm mx-auto space-y-2">
             {[
               'Parsing 3,000+ real transactions...',
@@ -143,13 +139,13 @@ export default function Insights() {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.5 }}
-                className="flex items-center gap-2 text-sm text-muted-foreground"
+                className="flex items-center gap-2 text-sm text-[#8A8878]"
               >
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: i * 0.5 + 0.25 }}
-                  className="w-1.5 h-1.5 rounded-full bg-primary"
+                  className="w-1.5 h-1.5 rounded-full bg-[#A3B570]"
                 />
                 {text}
               </motion.div>
@@ -171,38 +167,40 @@ export default function Insights() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
             >
-              <Card className="p-6 border-gradient overflow-hidden relative">
-                <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full blur-3xl -mr-24 -mt-24" />
-                <div className="relative z-10">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center glow-green">
-                      <Compass className="w-7 h-7 text-primary" />
+              <GlowingBorder>
+                <div className="p-6 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-48 h-48 bg-[#A3B570]/5 rounded-full blur-3xl -mr-24 -mt-24" />
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-14 h-14 rounded-2xl bg-[#A3B570]/10 flex items-center justify-center glow-sage">
+                        <Compass className="w-7 h-7 text-[#A3B570]" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-[#8A8878] font-medium uppercase tracking-wider">Your Financial Archetype</p>
+                        <h2 className="text-2xl font-bold text-gradient">{persona.archetype}</h2>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Your Financial Archetype</p>
-                      <h2 className="text-2xl font-bold text-gradient">{persona.archetype}</h2>
+
+                    <p className="text-sm text-[#8A8878] leading-relaxed mb-4">
+                      {persona.lifestyle_summary}
+                    </p>
+
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {persona.traits?.map((trait, i) => (
+                        <Badge key={i} variant="secondary" className="bg-[#A3B570]/10 text-[#A3B570] border-[#A3B570]/20 text-xs">
+                          {trait}
+                        </Badge>
+                      ))}
                     </div>
-                  </div>
 
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                    {persona.lifestyle_summary}
-                  </p>
-
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {persona.traits?.map((trait, i) => (
-                      <Badge key={i} variant="secondary" className="bg-primary/5 text-primary border-primary/10 text-xs">
-                        {trait}
-                      </Badge>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                    <span><strong className="text-foreground">Type:</strong> {persona.financial_type}</span>
-                    <span className="text-muted-foreground/50">|</span>
-                    <span><strong className="text-foreground">Style:</strong> {persona.spending_personality}</span>
+                    <div className="flex items-center gap-4 text-xs text-[#8A8878]">
+                      <span><strong className="text-[#E8E4DA]">Type:</strong> {persona.financial_type}</span>
+                      <span className="text-[#333D30]">|</span>
+                      <span><strong className="text-[#E8E4DA]">Style:</strong> {persona.spending_personality}</span>
+                    </div>
                   </div>
                 </div>
-              </Card>
+              </GlowingBorder>
             </motion.div>
           )}
 
@@ -214,22 +212,22 @@ export default function Insights() {
               transition={{ delay: 0.1 }}
             >
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <Card className="p-3 bg-card border-border/50">
-                  <p className="text-[10px] text-muted-foreground uppercase">Transactions</p>
-                  <p className="text-lg font-bold">{exhaust.overview.total_transactions?.toLocaleString()}</p>
-                </Card>
-                <Card className="p-3 bg-card border-border/50">
-                  <p className="text-[10px] text-muted-foreground uppercase">Months</p>
-                  <p className="text-lg font-bold">{exhaust.overview.months_covered}</p>
-                </Card>
-                <Card className="p-3 bg-card border-border/50">
-                  <p className="text-[10px] text-muted-foreground uppercase">Avg Daily</p>
-                  <p className="text-lg font-bold">{prefix}{exhaust.overview.avg_daily_spend?.toLocaleString()}</p>
-                </Card>
-                <Card className="p-3 bg-card border-border/50">
-                  <p className="text-[10px] text-muted-foreground uppercase">Avg Txn</p>
-                  <p className="text-lg font-bold">{prefix}{exhaust.overview.avg_transaction_size?.toLocaleString()}</p>
-                </Card>
+                <SpotlightCard>
+                  <p className="text-[10px] text-[#8A8878] uppercase tracking-wider">Transactions</p>
+                  <p className="text-lg font-bold text-[#E8E4DA]">{exhaust.overview.total_transactions?.toLocaleString()}</p>
+                </SpotlightCard>
+                <SpotlightCard>
+                  <p className="text-[10px] text-[#8A8878] uppercase tracking-wider">Months</p>
+                  <p className="text-lg font-bold text-[#E8E4DA]">{exhaust.overview.months_covered}</p>
+                </SpotlightCard>
+                <SpotlightCard>
+                  <p className="text-[10px] text-[#8A8878] uppercase tracking-wider">Avg Daily</p>
+                  <p className="text-lg font-bold text-[#E8E4DA]">{prefix}{exhaust.overview.avg_daily_spend?.toLocaleString()}</p>
+                </SpotlightCard>
+                <SpotlightCard>
+                  <p className="text-[10px] text-[#8A8878] uppercase tracking-wider">Avg Txn</p>
+                  <p className="text-lg font-bold text-[#E8E4DA]">{prefix}{exhaust.overview.avg_transaction_size?.toLocaleString()}</p>
+                </SpotlightCard>
               </div>
             </motion.div>
           )}
@@ -241,10 +239,10 @@ export default function Insights() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15 }}
             >
-              <Card className="p-5 bg-card border-border/50">
+              <SpotlightCard>
                 <div className="flex items-center gap-2 mb-3">
-                  <Globe className="w-4 h-4 text-primary" />
-                  <h3 className="font-semibold text-sm">Geographic Footprint</h3>
+                  <Globe className="w-4 h-4 text-[#A3B570]" />
+                  <h3 className="font-semibold text-sm text-[#D4C9A8]">Geographic Footprint</h3>
                 </div>
                 <div className="space-y-2">
                   {Object.entries(exhaust.geographic_signals as Record<string, {
@@ -252,24 +250,24 @@ export default function Insights() {
                   }>).map(([region, data]) => (
                     <div key={region} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <MapPin className="w-3.5 h-3.5 text-muted-foreground" />
-                        <span className="text-sm font-medium">{region}</span>
+                        <MapPin className="w-3.5 h-3.5 text-[#8A8878]" />
+                        <span className="text-sm font-medium text-[#E8E4DA]">{region}</span>
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-3 text-xs text-[#8A8878]">
                         <span>{data.transactions} txns</span>
-                        <span className="font-medium text-foreground">{prefix}{data.total_spent.toLocaleString()}</span>
+                        <span className="font-medium text-[#E8E4DA]">{prefix}{data.total_spent.toLocaleString()}</span>
                       </div>
                     </div>
                   ))}
                 </div>
-              </Card>
+              </SpotlightCard>
             </motion.div>
           )}
 
           {/* Insight Cards */}
           <div className="flex items-center gap-2 pt-2">
-            <Zap className="w-4 h-4 text-primary" />
-            <h3 className="font-semibold text-sm">{insights.insights.length} AI-Discovered Insights</h3>
+            <Zap className="w-4 h-4 text-[#A3B570]" />
+            <h3 className="font-semibold text-sm text-[#D4C9A8]">{insights.insights.length} AI-Discovered Insights</h3>
           </div>
 
           <AnimatePresence>
@@ -284,7 +282,7 @@ export default function Insights() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 + i * 0.08 }}
                 >
-                  <Card className={`p-5 border ${sevConfig.border} ${sevConfig.bg}`}>
+                  <SpotlightCard className={`${sevConfig.border} border`} spotlightColor={`${catConfig.color}10`}>
                     <div className="flex items-start gap-4">
                       <div
                         className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
@@ -294,16 +292,16 @@ export default function Insights() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <h4 className="font-semibold text-sm">{insight.title}</h4>
+                          <h4 className="font-semibold text-sm text-[#E8E4DA]">{insight.title}</h4>
                           <Badge
                             variant="secondary"
                             className="text-[10px]"
-                            style={{ background: `${catConfig.color}15`, color: catConfig.color }}
+                            style={{ background: `${catConfig.color}15`, color: catConfig.color, borderColor: `${catConfig.color}30` }}
                           >
                             {catConfig.label}
                           </Badge>
                           {insight.impact_amount && (
-                            <Badge variant="secondary" className="text-[10px] bg-primary/10 text-primary">
+                            <Badge variant="secondary" className="text-[10px] bg-[#A3B570]/10 text-[#A3B570] border-[#A3B570]/20">
                               {prefix}{Math.abs(insight.impact_amount).toLocaleString()} impact
                             </Badge>
                           )}
@@ -311,13 +309,13 @@ export default function Insights() {
                         <p className={`text-sm leading-relaxed mb-2 ${sevConfig.text}`}>
                           {insight.description}
                         </p>
-                        <div className="flex items-start gap-2 bg-white/60 rounded-lg p-2.5">
-                          <Target className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
-                          <p className="text-xs font-medium text-foreground">{insight.action}</p>
+                        <div className="flex items-start gap-2 bg-[#2C362A]/60 rounded-lg p-2.5">
+                          <Target className="w-3.5 h-3.5 text-[#A3B570] mt-0.5 shrink-0" />
+                          <p className="text-xs font-medium text-[#E8E4DA]">{insight.action}</p>
                         </div>
                       </div>
                     </div>
-                  </Card>
+                  </SpotlightCard>
                 </motion.div>
               )
             })}
@@ -330,16 +328,16 @@ export default function Insights() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
             >
-              <Card className="p-5 bg-card border-border/50">
+              <SpotlightCard>
                 <div className="flex items-center gap-2 mb-4">
-                  <BarChart3 className="w-4 h-4 text-muted-foreground" />
-                  <h3 className="font-semibold text-sm">Raw Data Exhaust Signals</h3>
+                  <BarChart3 className="w-4 h-4 text-[#8A8878]" />
+                  <h3 className="font-semibold text-sm text-[#D4C9A8]">Raw Data Exhaust Signals</h3>
                 </div>
 
                 {/* Day of Week Pattern */}
                 {exhaust.day_of_week_pattern && (
                   <div className="mb-4">
-                    <p className="text-xs text-muted-foreground mb-2">Spending by Day of Week</p>
+                    <p className="text-xs text-[#8A8878] mb-2">Spending by Day of Week</p>
                     <div className="flex items-end gap-1.5 h-16">
                       {Object.entries(exhaust.day_of_week_pattern.totals as Record<string, number>).map(
                         ([day, total]) => {
@@ -350,14 +348,16 @@ export default function Insights() {
                           const isPeak = day === exhaust.day_of_week_pattern.peak_day
                           return (
                             <div key={day} className="flex-1 flex flex-col items-center gap-1">
-                              <div
+                              <motion.div
                                 className="w-full rounded-t transition-all duration-500"
+                                initial={{ height: 0 }}
+                                animate={{ height: `${Math.max(pct, 4)}%` }}
+                                transition={{ duration: 0.6, delay: 0.1 }}
                                 style={{
-                                  height: `${Math.max(pct, 4)}%`,
-                                  background: isPeak ? '#3b82f6' : '#e2e8f0',
+                                  background: isPeak ? '#A3B570' : '#333D30',
                                 }}
                               />
-                              <span className={`text-[9px] ${isPeak ? 'text-primary font-bold' : 'text-muted-foreground'}`}>
+                              <span className={`text-[9px] ${isPeak ? 'text-[#A3B570] font-bold' : 'text-[#8A8878]'}`}>
                                 {day.slice(0, 3)}
                               </span>
                             </div>
@@ -371,13 +371,13 @@ export default function Insights() {
                 {/* Merchant Clusters */}
                 {exhaust.merchant_clusters && Object.keys(exhaust.merchant_clusters).length > 0 && (
                   <div className="mb-4">
-                    <p className="text-xs text-muted-foreground mb-2">Behavioral Clusters</p>
+                    <p className="text-xs text-[#8A8878] mb-2">Behavioral Clusters</p>
                     <div className="flex flex-wrap gap-2">
                       {Object.entries(exhaust.merchant_clusters as Record<string, { count: number; total: number }>).map(
                         ([cluster, data]) => (
-                          <Badge key={cluster} variant="outline" className="text-[10px] gap-1">
+                          <Badge key={cluster} variant="outline" className="text-[10px] gap-1 border-[#333D30] text-[#D4C9A8]">
                             {cluster.replace(/_/g, ' ')}
-                            <span className="text-muted-foreground">({data.count})</span>
+                            <span className="text-[#8A8878]">({data.count})</span>
                           </Badge>
                         )
                       )}
@@ -388,29 +388,29 @@ export default function Insights() {
                 {/* Detected Subscriptions */}
                 {exhaust.subscription_detection?.length > 0 && (
                   <div>
-                    <p className="text-xs text-muted-foreground mb-2">Detected Subscriptions</p>
+                    <p className="text-xs text-[#8A8878] mb-2">Detected Subscriptions</p>
                     <div className="space-y-1.5">
                       {(exhaust.subscription_detection as Array<{
                         merchant: string; monthly_cost: number; months_detected: number
                       }>).slice(0, 8).map((sub, i) => (
                         <div key={i} className="flex items-center justify-between text-xs">
-                          <span className="text-foreground truncate">{sub.merchant}</span>
+                          <span className="text-[#E8E4DA] truncate">{sub.merchant}</span>
                           <div className="flex items-center gap-2 shrink-0">
-                            <span className="text-muted-foreground">{sub.months_detected}mo</span>
-                            <span className="font-medium">{prefix}{sub.monthly_cost.toFixed(2)}/mo</span>
+                            <span className="text-[#8A8878]">{sub.months_detected}mo</span>
+                            <span className="font-medium text-[#E8E4DA]">{prefix}{sub.monthly_cost.toFixed(2)}/mo</span>
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
-              </Card>
+              </SpotlightCard>
             </motion.div>
           )}
 
           {/* Regenerate */}
           <div className="text-center">
-            <Button variant="ghost" onClick={fetchInsights}>
+            <Button variant="ghost" onClick={fetchInsights} className="text-[#8A8878] hover:text-[#A3B570]">
               <Sparkles className="w-4 h-4 mr-2" />
               Regenerate Insights
             </Button>

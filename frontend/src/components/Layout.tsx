@@ -3,7 +3,6 @@ import { cn } from '@/lib/utils'
 import {
   LayoutDashboard, TrendingUp, Briefcase, BarChart3, Bot, Bell, Search, Settings, Brain
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 
 const NAV_ITEMS = [
   { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -19,19 +18,21 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background flex font-sans text-foreground">
       {/* Sidebar */}
-      <aside className="fixed left-0 top-0 h-screen w-[260px] bg-white border-r border-[#eef2f7] flex flex-col z-50">
+      <aside className="fixed left-0 top-0 h-screen w-[240px] bg-[#1B211A] border-r border-[#333D30]/50 flex flex-col z-50">
         {/* Logo Area */}
-        <div className="p-6 mb-2">
+        <div className="px-5 py-6 mb-4">
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-              <Bot className="w-6 h-6" />
+            <div className="w-9 h-9 rounded-lg bg-[#A3B570]/15 flex items-center justify-center">
+              <Bot className="w-5 h-5 text-[#A3B570]" />
             </div>
-            <span className="text-xl font-semibold tracking-tight text-foreground">BAQI AI</span>
+            <span className="text-lg font-semibold tracking-tight text-[#E8E4DA]">
+              BAQI AI
+            </span>
           </Link>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 space-y-1">
+        <nav className="flex-1 px-3 space-y-0.5">
           {NAV_ITEMS.map(({ path, icon: Icon, label }) => {
             const isActive = location.pathname === path
             return (
@@ -39,65 +40,75 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 key={path}
                 to={path}
                 className={cn(
-                  'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group',
-                  isActive 
-                    ? 'bg-[#f1f5f9] text-[#0f172a] font-medium' 
-                    : 'text-[#64748b] hover:bg-[#f8fafc] hover:text-[#0f172a]'
+                  'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group relative',
+                  isActive
+                    ? 'text-[#E8E4DA]'
+                    : 'text-[#8A8878] hover:text-[#D4C9A8]'
                 )}
               >
-                <Icon className={cn('w-5 h-5', isActive ? 'text-primary' : 'text-[#94a3b8] group-hover:text-[#64748b]')} />
-                <span>{label}</span>
+                {/* Active indicator — glowing bar */}
+                {isActive && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-[#A3B570] shadow-[0_0_8px_rgba(163,181,112,0.5)]" />
+                )}
+
+                {/* Active background */}
+                {isActive && (
+                  <div className="absolute inset-0 rounded-lg bg-[#A3B570]/8" />
+                )}
+
+                <Icon className={cn(
+                  'w-[18px] h-[18px] relative z-10 transition-colors',
+                  isActive ? 'text-[#A3B570]' : 'text-[#8A8878] group-hover:text-[#A3B570]/70'
+                )} />
+                <span className="text-sm relative z-10">{label}</span>
               </Link>
             )
           })}
         </nav>
 
         {/* Bottom Actions */}
-        <div className="p-4 border-t border-[#eef2f7]">
-           <button className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-[#64748b] hover:bg-[#f8fafc] hover:text-[#0f172a] transition-all duration-200">
-              <Settings className="w-5 h-5 text-[#94a3b8]" />
-              <span>Settings</span>
-           </button>
+        <div className="px-3 py-4 border-t border-[#333D30]/50">
+          <button className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-[#8A8878] hover:text-[#D4C9A8] transition-all duration-200">
+            <Settings className="w-[18px] h-[18px]" />
+            <span className="text-sm">Settings</span>
+          </button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 ml-[260px] min-h-screen flex flex-col">
+      <main className="flex-1 ml-[240px] min-h-screen flex flex-col">
         {/* Header */}
-        <header className="h-20 bg-transparent flex items-center justify-between px-8 py-4 sticky top-0 z-40 backdrop-blur-sm">
-          {/* Breadcrumb / Title Context - mostly static for now or derived from path */}
-          <div className="flex flex-col justify-center">
-             {/* Dynamic Title could go here */}
-          </div>
+        <header className="h-16 flex items-center justify-between px-8 sticky top-0 z-40 glass-surface border-b border-[#333D30]/30">
+          <div />
 
-          <div className="flex items-center gap-4">
-             {/* Search */}
-             <div className="relative hidden md:block">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8]" />
-                <input 
-                  type="text" 
-                  placeholder="Search..." 
-                  className="pl-10 pr-4 py-2 rounded-full bg-white border border-[#e2e8f0] text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 w-64 shadow-sm"
-                />
-             </div>
+          <div className="flex items-center gap-3">
+            {/* Search */}
+            <div className="relative hidden md:block">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8A8878]" />
+              <input
+                type="text"
+                placeholder="Search..."
+                className="pl-9 pr-4 py-2 rounded-lg bg-[#232B22] border border-[#333D30] text-sm text-[#E8E4DA] placeholder:text-[#8A8878] focus:outline-none focus:ring-1 focus:ring-[#A3B570]/30 w-56 transition-all"
+              />
+            </div>
 
-             {/* Notifications */}
-             <button className="w-10 h-10 rounded-full bg-white border border-[#e2e8f0] flex items-center justify-center text-[#64748b] shadow-sm hover:text-primary transition-colors relative">
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-red-500 border-2 border-white"></span>
-             </button>
+            {/* Notifications */}
+            <button className="w-9 h-9 rounded-lg bg-[#232B22] border border-[#333D30] flex items-center justify-center text-[#8A8878] hover:text-[#A3B570] transition-colors relative">
+              <Bell className="w-4 h-4" />
+              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#C65D4A]" />
+            </button>
 
-             {/* User Profile */}
-             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-blue-400 p-0.5 shadow-md cursor-pointer">
-                <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
-                   <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User" />
-                </div>
-             </div>
+            {/* User Avatar */}
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#A3B570] to-[#6B7D3A] p-[2px] cursor-pointer">
+              <div className="w-full h-full rounded-[6px] bg-[#232B22] flex items-center justify-center overflow-hidden">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User" className="w-full h-full" />
+              </div>
+            </div>
           </div>
         </header>
 
-        {/* Content Scrollable Area */}
-        <div className="flex-1 px-8 pb-8 overflow-auto">
+        {/* Content */}
+        <div className="flex-1 px-8 py-6 overflow-auto">
           {children}
         </div>
       </main>

@@ -1,5 +1,6 @@
 import os
 from typing import Optional
+from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from supabase import Client
@@ -7,15 +8,38 @@ from supabase import Client
 from app.database import get_supabase
 from app.services.spending_analyzer import analyze_transactions, normalize_csv_transactions
 from app.services.insights_engine import parse_csv_transactions
+from app.services.csv_parser import CSVParser
 
 router = APIRouter(prefix="/transactions", tags=["Transactions"])
 
+# Default CSV path (hardcoded demo data)
 CSV_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
                         "transactions1 cleaned2.csv")
 
+# Upload directory
+UPLOAD_DIR = Path(__file__).parent.parent.parent / "uploads"
 
-def _get_csv_transactions() -> list[dict] | None:
-    """Load and normalize CSV transactions if the file exists."""
+
+def _get_csv_transactions(user_id: Optional[int] = None) -> list[dict] | None:
+    """Load and normalize CSV transactions from uploaded file or default CSV."""
+    # First, try to find user-uploaded CSV
+    if user_id:
+        user_files = sorted(
+            [f for f in UPLOAD_DIR.glob(f"user_{user_id}_*.csv")],
+            key=lambda x: x.stat().st_mtime,
+            reverse=True
+        )
+        if user_files:
+            try:
+                parser = CSVParser(csv_path=str(user_files[0]))
+                csv_txns = parser.parse()
+                if len(csv_txns) >= 10:
+                    return normalize_csv_transactions(csv_txns)
+            except Exception as e:
+                print(f"Error parsing uploaded CSV: {e}")
+                # Fall through to default CSV
+    
+    # Fallback to default CSV
     if os.path.exists(CSV_PATH):
         csv_txns = parse_csv_transactions(CSV_PATH)
         if len(csv_txns) >= 10:
@@ -53,7 +77,7 @@ async def get_spending_analysis(
 ):
     """Analyze user spending patterns and calculate baqi (investable surplus)."""
     if source == "csv":
-        csv_transactions = _get_csv_transactions()
+        csv_transactions = _get_csv_transactions(user_id)
         if not csv_transactions:
             raise HTTPException(status_code=404, detail="CSV data not available")
         analysis = analyze_transactions(csv_transactions)
@@ -69,7 +93,7 @@ async def get_spending_analysis(
         return analysis
 
     # Auto-detect: prefer CSV if available
-    csv_transactions = _get_csv_transactions()
+    csv_transactions = _get_csv_transactions(user_id)
     if csv_transactions:
         analysis = analyze_transactions(csv_transactions)
         analysis["source"] = "csv"
@@ -92,7 +116,7 @@ async def list_transactions(
 ):
     """List user transactions (most recent first)."""
     if source == "csv":
-        csv_transactions = _get_csv_transactions()
+        csv_transactions = _get_csv_transactions(user_id)
         if not csv_transactions:
             raise HTTPException(status_code=404, detail="CSV data not available")
         sorted_txns = sorted(csv_transactions, key=lambda t: t["date"], reverse=True)
@@ -110,7 +134,7 @@ async def list_transactions(
         return {"transactions": result.data, "count": len(result.data), "source": "supabase"}
 
     # Auto-detect
-    csv_transactions = _get_csv_transactions()
+    csv_transactions = _get_csv_transactions(user_id)
     if csv_transactions:
         sorted_txns = sorted(csv_transactions, key=lambda t: t["date"], reverse=True)
         return {"transactions": sorted_txns[:limit], "count": len(sorted_txns[:limit]), "source": "csv"}

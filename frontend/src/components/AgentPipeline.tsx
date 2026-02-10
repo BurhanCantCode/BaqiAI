@@ -13,35 +13,35 @@ const AGENT_CONFIGS: Omit<AgentStep, 'status' | 'output' | 'streamedText'>[] = [
     name: 'Spending Analyzer',
     role: 'Categorizing transactions into fixed, discretionary & watery spending...',
     icon: 'BarChart3',
-    color: '#3b82f6',
+    color: '#A3B570',
   },
   {
     id: 'risk',
     name: 'Risk Profiler',
     role: 'Assessing investment risk tolerance based on quiz and demographics...',
     icon: 'Shield',
-    color: '#8b5cf6',
+    color: '#8A9E5C',
   },
   {
     id: 'market',
     name: 'Market Analyst',
     role: 'Analyzing PSX stock data from BAQI Data Engine...',
     icon: 'TrendingUp',
-    color: '#06b6d4',
+    color: '#6B7D3A',
   },
   {
     id: 'halal',
     name: 'Halal Compliance',
     role: 'Screening stocks against KMI-30 Shariah compliance criteria...',
     icon: 'Moon',
-    color: '#f59e0b',
+    color: '#D4C9A8',
   },
   {
     id: 'investment',
     name: 'Investment Strategist',
     role: 'Building your personalized Shariah-compliant portfolio...',
     icon: 'Briefcase',
-    color: '#10b981',
+    color: '#A3B570',
   },
 ]
 
@@ -119,7 +119,6 @@ export default function AgentPipeline({ isRunning, onComplete }: AgentPipelinePr
     const agentId = AGENT_CONFIGS[currentAgent].id
     const lines = SIMULATED_STREAMS[agentId] || []
 
-    // Mark agent as active
     setAgents(prev => prev.map((a, i) =>
       i === currentAgent ? { ...a, status: 'active' } : a
     ))
@@ -131,7 +130,6 @@ export default function AgentPipeline({ isRunning, onComplete }: AgentPipelinePr
     const streamInterval = setInterval(() => {
       if (lineIdx >= lines.length) {
         clearInterval(streamInterval)
-        // Mark done, move to next
         setAgents(prev => prev.map((a, i) =>
           i === currentAgent ? { ...a, status: 'done', output: lines.join('\n') } : a
         ))
@@ -157,12 +155,11 @@ export default function AgentPipeline({ isRunning, onComplete }: AgentPipelinePr
         lineIdx++
         charIdx = 0
       }
-    }, 25) // Fast typewriter speed
+    }, 25)
 
     return () => clearInterval(streamInterval)
   }, [currentAgent, onComplete])
 
-  // Auto-scroll to active agent
   useEffect(() => {
     if (scrollRef.current && currentAgent >= 0) {
       const el = scrollRef.current.children[currentAgent] as HTMLElement
@@ -172,7 +169,6 @@ export default function AgentPipeline({ isRunning, onComplete }: AgentPipelinePr
 
   return (
     <div className="space-y-3" ref={scrollRef}>
-      {/* Connection SVG lines between agents */}
       <div className="relative">
         {agents.map((agent, idx) => {
           const Icon = IconMap[agent.icon] || Briefcase
@@ -188,11 +184,11 @@ export default function AgentPipeline({ isRunning, onComplete }: AgentPipelinePr
               transition={{ delay: idx * 0.1, duration: 0.4 }}
               className="mb-3"
             >
-              {/* Connection line to next agent */}
+              {/* Connection line */}
               {idx < agents.length - 1 && (
                 <div className="absolute left-6 ml-[1px] h-3 w-px" style={{
                   top: `calc(${idx * 100}% + 3rem)`,
-                  background: isDone ? agent.color : '#e2e8f0',
+                  background: isDone ? agent.color : '#333D30',
                   transition: 'background 0.5s',
                 }} />
               )}
@@ -200,10 +196,10 @@ export default function AgentPipeline({ isRunning, onComplete }: AgentPipelinePr
               <div
                 className={cn(
                   'rounded-xl border p-4 transition-all duration-500',
-                  isActive && 'border-gradient glow-green',
-                  isDone && 'border-primary/30 bg-primary/5',
-                  isWaiting && 'border-border bg-card/50 opacity-50',
-                  !isActive && !isDone && !isWaiting && 'border-border bg-card',
+                  isActive && 'border-[#A3B570]/30 glow-sage bg-[#232B22]',
+                  isDone && 'border-[#A3B570]/20 bg-[#A3B570]/5',
+                  isWaiting && 'border-[#333D30] bg-[#232B22]/50 opacity-50',
+                  !isActive && !isDone && !isWaiting && 'border-[#333D30] bg-card',
                 )}
               >
                 {/* Agent header */}
@@ -219,7 +215,7 @@ export default function AgentPipeline({ isRunning, onComplete }: AgentPipelinePr
                     }}
                   >
                     {isDone ? (
-                      <CheckCircle2 className="w-5 h-5 text-primary" />
+                      <CheckCircle2 className="w-5 h-5 text-[#A3B570]" />
                     ) : isActive ? (
                       <Loader2 className="w-5 h-5 animate-spin" style={{ color: agent.color }} />
                     ) : (
@@ -229,28 +225,28 @@ export default function AgentPipeline({ isRunning, onComplete }: AgentPipelinePr
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-sm">{agent.name}</h3>
+                      <h3 className="font-semibold text-sm text-[#E8E4DA]">{agent.name}</h3>
                       {isActive && (
                         <motion.div
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
-                          className="flex items-center gap-1 text-xs text-primary"
+                          className="flex items-center gap-1 text-xs text-[#A3B570]"
                         >
                           <Zap className="w-3 h-3" />
                           <span>LIVE</span>
                         </motion.div>
                       )}
                       {isDone && (
-                        <span className="text-xs text-primary/70">Complete</span>
+                        <span className="text-xs text-[#A3B570]/70">Complete</span>
                       )}
                     </div>
                     {isWaiting && (
-                      <p className="text-xs text-muted-foreground truncate">{agent.role}</p>
+                      <p className="text-xs text-[#8A8878] truncate">{agent.role}</p>
                     )}
                   </div>
 
                   {idx < agents.length - 1 && isDone && (
-                    <ArrowRight className="w-4 h-4 text-primary/50" />
+                    <ArrowRight className="w-4 h-4 text-[#A3B570]/50" />
                   )}
                 </div>
 
@@ -264,24 +260,24 @@ export default function AgentPipeline({ isRunning, onComplete }: AgentPipelinePr
                       transition={{ duration: 0.3 }}
                       className="overflow-hidden"
                     >
-                      <div className="mt-2 rounded-lg bg-muted/50 p-3 font-mono text-xs leading-relaxed">
+                      <div className="mt-2 rounded-lg bg-[#1B211A]/80 border border-[#333D30]/50 p-3 font-mono text-xs leading-relaxed">
                         {isDone ? (
                           agent.output.split('\n').map((line, i) => (
                             <motion.div
                               key={i}
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
-                              className="text-muted-foreground"
+                              className="text-[#8A8878]"
                             >
-                              <span className="text-primary/40 mr-2">{'>'}</span>
+                              <span className="text-[#A3B570]/40 mr-2">{'>'}</span>
                               {line}
                             </motion.div>
                           ))
                         ) : (
                           <div>
                             {agent.streamedText.split('\n').map((line, i) => (
-                              <div key={i} className="text-foreground/80">
-                                {line && <span className="text-primary/40 mr-2">{'>'}</span>}
+                              <div key={i} className="text-[#E8E4DA]/80">
+                                {line && <span className="text-[#A3B570]/40 mr-2">{'>'}</span>}
                                 {line}
                               </div>
                             ))}

@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { formatPKR } from '@/lib/utils'
+import { formatMoney } from '@/lib/utils'
 import { useApp } from '@/context/AppContext'
 import {
   Home, ShoppingCart, Droplets, TrendingUp, Loader2, BarChart3
@@ -35,6 +35,10 @@ export default function Analysis() {
     )
   }
 
+  const cur = data.currency
+  const fmt = (v: number) => formatMoney(v, cur)
+  const months = data.monthly_breakdown?.length || 6
+
   const categories = [
     { key: 'fixed' as const, data: data.fixed },
     { key: 'discretionary' as const, data: data.discretionary },
@@ -51,7 +55,7 @@ export default function Analysis() {
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-2xl font-bold">Spending Analysis</h1>
-        <p className="text-muted-foreground text-sm">6-month breakdown of your transaction data</p>
+        <p className="text-muted-foreground text-sm">{months}-month breakdown of your transaction data</p>
       </motion.div>
 
       {/* BAQI Highlight */}
@@ -60,9 +64,9 @@ export default function Analysis() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Your Monthly BAQI (Investable Surplus)</p>
-              <p className="text-3xl font-bold text-primary">{formatPKR(data.baqi_amount / 6)}</p>
+              <p className="text-3xl font-bold text-primary">{fmt(data.baqi_amount / months)}</p>
               <p className="text-xs text-muted-foreground mt-1">
-                {data.savings_rate.toFixed(1)}% savings rate | Potential: {formatPKR(data.recommended_investment / 6)}/mo with watery reduction
+                {data.savings_rate.toFixed(1)}% savings rate | Potential: {fmt(data.recommended_investment / months)}/mo with watery reduction
               </p>
             </div>
             <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center glow-green">
@@ -96,7 +100,7 @@ export default function Analysis() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold">{formatPKR(catData.total)}</p>
+                    <p className="font-bold">{fmt(catData.total)}</p>
                     <Badge variant="secondary" className="text-xs" style={{ background: `${config.color}15`, color: config.color }}>
                       {catData.percentage.toFixed(1)}%
                     </Badge>
@@ -109,7 +113,7 @@ export default function Analysis() {
                     <div key={j} className="flex items-center justify-between text-xs">
                       <span className="text-muted-foreground">{m.merchant}</span>
                       <div className="flex items-center gap-2">
-                        <span>{formatPKR(m.total)}</span>
+                        <span>{fmt(m.total)}</span>
                         <div className="w-16 h-1.5 rounded-full bg-secondary overflow-hidden">
                           <div
                             className="h-full rounded-full transition-all duration-500"
@@ -134,11 +138,11 @@ export default function Analysis() {
         <h3 className="font-semibold mb-4">Top Merchants by Spending</h3>
         <ResponsiveContainer width="100%" height={250}>
           <BarChart data={topMerchants} layout="vertical" margin={{ left: 80 }}>
-            <XAxis type="number" tick={{ fontSize: 11, fill: '#94a3b8' }} tickFormatter={v => `${(v/1000).toFixed(0)}k`} />
+            <XAxis type="number" tick={{ fontSize: 11, fill: '#94a3b8' }} tickFormatter={v => `${cur === 'PKR' ? '' : '$'}${(v/1000).toFixed(0)}k`} />
             <YAxis dataKey="merchant" type="category" tick={{ fontSize: 11, fill: '#94a3b8' }} width={80} />
             <Tooltip
               contentStyle={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}
-              formatter={(val: any) => formatPKR(Number(val))}
+              formatter={(val: any) => fmt(Number(val))}
             />
             <Bar dataKey="total" radius={[0, 4, 4, 0]}>
               {topMerchants.map((entry, i) => (

@@ -4,6 +4,112 @@ from collections import defaultdict
 
 from app.utils.constants import FIXED_CATEGORIES, DISCRETIONARY_CATEGORIES, WATERY_CATEGORIES
 
+# ---------------------------------------------------------------------------
+# CSV merchant classification — keyword → (category, spending_type)
+# ---------------------------------------------------------------------------
+
+_FIXED_KEYWORDS = {
+    "rent": ["rent", "landlord", "apt ", "property"],
+    "utilities": ["con ed", "electric", "gas bill", "water bill", "comcast",
+                   "spectrum", "verizon wireless", "t-mobile", "at&t", "phone bill"],
+    "insurance": ["insurance", "geico", "allstate", "progressive", "cigna"],
+    "loan": ["loan", "mortgage", "student loan", "sallie mae", "navient"],
+    "subscription": ["netflix", "spotify", "youtube prem", "patreon", "substack",
+                      "rocket money", "hulu", "disney+", "porkbun", "kindle",
+                      "appscreen", "gotinder", "amazon digital", "audible"],
+    "taxes": ["irs ", "usataxpymt", "tax payment", "state tax", "nys dtf",
+              "taxpayment", "taxpaymnt", "nyc dept of fina"],
+    "management": ["prositmanagement", "management fee", "hoa "],
+    "health_insurance": ["cobra", "supplestack"],
+}
+
+# Financial transfers — excluded from spending (moving money, not consuming)
+_TRANSFER_KEYWORDS = ["brokerage", "funds transfer", "venmo", "zelle", "wise.com",
+                       "wise inc wise", "xoom", "wire transfer", "robinhood",
+                       "wealthfront", "applecard", "barclaycard",
+                       "chase credit card", "payment to credit", "autopay"]
+
+_DISCRETIONARY_KEYWORDS = {
+    "groceries": ["trader joe", "whole foods", "mercadona", "grocery", "market",
+                   "produce", "carniceria", "fruter", "wegmans", "aldi", "costco",
+                   "food bazaar", "key food"],
+    "transport": ["uber", "lyft", "nyct", "tfl", "citibik", "lime", "ferry",
+                   "renfe", "metro", "cab ", "taxi", "indrive", "alpytransfer",
+                   "edreams", "kiwi.com"],
+    "healthcare": ["medical", "pharmacy", "hospital", "dental", "doctor",
+                    "health", "cvs", "walgreens", "biotech", "oral", "lcsw",
+                    "therapist", "counselor", "psychiatr"],
+    "education": ["coursera", "udemy", "tuition", "university", "skillshare"],
+}
+
+_WATERY_KEYWORDS = {
+    "food": ["restaurant", "taco", "pizza", "burger", "shake shack", "mcdonald",
+             "popeyes", "poke", "kitchen", "grill", "diner", "sushi", "dig ",
+             "wonder", "mealpal", "grubhub", "doordash", "seamless", "kababjees",
+             "condesa", "califa", "contramar", "chui", "baveno", "nonna",
+             "baltra", "felix", "pintamonas", "campillo"],
+    "coffee": ["coffee", "cafe", "caf ", "pret", "devocion", "blue bottle",
+               "grind", "roast", "espresso", "latte", "butler", "ole and steen",
+               "starbucks", "dunkin"],
+    "entertainment": ["cinema", "movie", "concert", "bar ", "pub ", "lounge",
+                       "club", "bowlero", "cue studio"],
+    "shopping": ["amazon", "uniqlo", "zara", "h&m", "target", "walmart",
+                  "ebay", "sapphire", "khaadi", "daraz", "david mellor",
+                  "superdrug", "tiger"],
+    "travel": ["airbnb", "hotel", "esf chamonix", "thermes", "booking.com"],
+}
+
+_INCOME_KEYWORDS = ["payment received", "incoming wire", "interest earned",
+                    "deposit", "payment - thank", "direct dep", "payroll",
+                    "refund", "cashback"]
+
+
+def _classify_merchant(name: str) -> tuple[str, str]:
+    """Classify a merchant name into (category, spending_type)."""
+    lower = name.lower()
+    for cat, keywords in _FIXED_KEYWORDS.items():
+        if any(kw in lower for kw in keywords):
+            return cat, "fixed"
+    for cat, keywords in _DISCRETIONARY_KEYWORDS.items():
+        if any(kw in lower for kw in keywords):
+            return cat, "discretionary"
+    for cat, keywords in _WATERY_KEYWORDS.items():
+        if any(kw in lower for kw in keywords):
+            return cat, "watery"
+    return "other", "watery"
+
+
+def normalize_csv_transactions(csv_txns: list[dict]) -> list[dict]:
+    """Convert CSV format (date, name, amount) into spending analyzer format."""
+    normalized = []
+    for t in csv_txns:
+        amount = float(t["amount"])
+        name = t.get("name", "Unknown")
+        lower = name.lower()
+
+        # Skip financial transfers (moving money between accounts, not spending)
+        if any(kw in lower for kw in _TRANSFER_KEYWORDS):
+            continue
+
+        if amount < 0 or any(kw in lower for kw in _INCOME_KEYWORDS):
+            normalized.append({
+                "date": t["date"],
+                "amount": abs(amount),
+                "merchant": name,
+                "category": "salary",
+                "spending_type": "income",
+            })
+        elif amount > 0:
+            category, spending_type = _classify_merchant(name)
+            normalized.append({
+                "date": t["date"],
+                "amount": amount,
+                "merchant": name,
+                "category": category,
+                "spending_type": spending_type,
+            })
+    return normalized
+
 
 def analyze_transactions(transactions: list[dict]) -> dict:
     """

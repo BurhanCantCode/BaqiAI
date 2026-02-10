@@ -6,25 +6,36 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { baqiApi } from '@/api/client'
-import { formatPKR } from '@/lib/utils'
+import { formatMoney } from '@/lib/utils'
 import { useApp } from '@/context/AppContext'
 import {
   TrendingUp, Wallet, PiggyBank, AlertTriangle, Sparkles, ArrowRight, Bot,
-  Loader2
+  Loader2, FileSpreadsheet, Globe
 } from 'lucide-react'
 
 export default function Dashboard() {
-  const { userId, user, analysis, loading, setUserId, refreshAll } = useApp()
+  const { userId, user, analysis, loading, dataSource, setUserId, switchDataSource, refreshAll } = useApp()
   const [demoLoading, setDemoLoading] = useState(false)
+  const [csvLoading, setCsvLoading] = useState(false)
   const navigate = useNavigate()
+
+  const handleCSV = async () => {
+    setCsvLoading(true)
+    try {
+      switchDataSource('csv', 1)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setCsvLoading(false)
+    }
+  }
 
   const handleDemo = async () => {
     setDemoLoading(true)
     try {
       const res = await baqiApi.generateSyntheticData()
       const newUserId = res.data.user_id
-      setUserId(newUserId)
-      // Context will auto-refresh via useEffect on userId change
+      switchDataSource('supabase', newUserId)
     } catch (err) {
       console.error(err)
     } finally {
@@ -40,8 +51,8 @@ export default function Dashboard() {
     )
   }
 
-  // Onboarding state — no user yet
-  if (!userId || !analysis) {
+  // Onboarding state — no data source chosen yet
+  if (!dataSource || !analysis) {
     return (
       <div className="flex flex-col items-center justify-center h-[70vh] text-center animate-fade-in-up">
         <motion.div
@@ -66,28 +77,74 @@ export default function Dashboard() {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3 }}
+          className="w-full max-w-2xl"
         >
-          <Button
-            size="lg"
-            onClick={handleDemo}
-            disabled={demoLoading}
-            className="font-semibold px-8 py-6 text-lg rounded-xl shadow-lg shadow-primary/20"
-          >
-            {demoLoading ? (
-              <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Setting up demo...</>
-            ) : (
-              <><Sparkles className="w-5 h-5 mr-2" /> Try Demo — Generate Sample Data</>
-            )}
-          </Button>
-          <p className="text-xs text-muted-foreground mt-3">
-            Creates a demo profile with 6 months of realistic PKR transactions
-          </p>
+          <p className="text-sm text-muted-foreground mb-4 font-medium">Choose your data source</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* CSV Option */}
+            <Card
+              className="p-6 cursor-pointer hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 transition-all group relative overflow-hidden"
+              onClick={!csvLoading && !demoLoading ? handleCSV : undefined}
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-2xl -mr-16 -mt-16" />
+              <div className="relative z-10">
+                <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <FileSpreadsheet className="w-6 h-6 text-blue-600" />
+                </div>
+                <h3 className="font-bold text-lg mb-1">Real Bank Statement</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Analyze actual transaction data from a US bank account — 18 months of real spending.
+                </p>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="bg-blue-50 text-blue-600 border-blue-200 text-xs">USD</Badge>
+                  <Badge variant="secondary" className="bg-blue-50 text-blue-600 border-blue-200 text-xs">3,000+ txns</Badge>
+                  <Badge variant="secondary" className="bg-blue-50 text-blue-600 border-blue-200 text-xs">Instant</Badge>
+                </div>
+                {csvLoading && (
+                  <div className="absolute inset-0 bg-background/80 flex items-center justify-center rounded-lg">
+                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            {/* Demo Option */}
+            <Card
+              className="p-6 cursor-pointer hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 transition-all group relative overflow-hidden"
+              onClick={!csvLoading && !demoLoading ? handleDemo : undefined}
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl -mr-16 -mt-16" />
+              <div className="relative z-10">
+                <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <Globe className="w-6 h-6 text-emerald-600" />
+                </div>
+                <h3 className="font-bold text-lg mb-1">Pakistani Demo Data</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Generate a realistic Pakistani banking profile with 6 months of synthetic PKR transactions.
+                </p>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="bg-emerald-50 text-emerald-600 border-emerald-200 text-xs">PKR</Badge>
+                  <Badge variant="secondary" className="bg-emerald-50 text-emerald-600 border-emerald-200 text-xs">Synthetic</Badge>
+                  <Badge variant="secondary" className="bg-emerald-50 text-emerald-600 border-emerald-200 text-xs">~5 sec</Badge>
+                </div>
+                {demoLoading && (
+                  <div className="absolute inset-0 bg-background/80 flex items-center justify-center rounded-lg">
+                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  </div>
+                )}
+              </div>
+            </Card>
+          </div>
         </motion.div>
       </div>
     )
   }
 
   // Dashboard with data
+  const cur = analysis.currency
+  const fmt = (v: number) => formatMoney(v, cur)
+  const months = analysis.monthly_breakdown.length || 6
+
   const pieData = [
     { name: 'Fixed', value: analysis.fixed.percentage, color: '#3b82f6' },
     { name: 'Discretionary', value: analysis.discretionary.percentage, color: '#8b5cf6' },
@@ -101,10 +158,10 @@ export default function Dashboard() {
   }))
 
   const stats = [
-    { label: 'Total Income', value: formatPKR(analysis.total_income), icon: Wallet, color: 'bg-blue-50 text-blue-600', change: '6 months' },
-    { label: 'Total Spending', value: formatPKR(analysis.total_spending), icon: AlertTriangle, color: 'bg-amber-50 text-amber-600', change: `${(100 - analysis.savings_rate).toFixed(1)}%` },
+    { label: 'Total Income', value: fmt(analysis.total_income), icon: Wallet, color: 'bg-blue-50 text-blue-600', change: `${months} months` },
+    { label: 'Total Spending', value: fmt(analysis.total_spending), icon: AlertTriangle, color: 'bg-amber-50 text-amber-600', change: `${(100 - analysis.savings_rate).toFixed(1)}%` },
     { label: 'Savings Rate', value: `${analysis.savings_rate.toFixed(1)}%`, icon: PiggyBank, color: 'bg-purple-50 text-purple-600', change: 'of income' },
-    { label: 'Monthly BAQI', value: formatPKR(analysis.baqi_amount / 6), icon: TrendingUp, color: 'bg-emerald-50 text-emerald-600', change: 'investable' },
+    { label: 'Monthly BAQI', value: fmt(analysis.baqi_amount / months), icon: TrendingUp, color: 'bg-emerald-50 text-emerald-600', change: 'investable' },
   ]
 
   return (
@@ -113,11 +170,41 @@ export default function Dashboard() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            Welcome back, <span className="text-gradient">{user?.name || 'User'}</span>
+            {user ? (
+              <>Welcome back, <span className="text-gradient">{user.name}</span></>
+            ) : (
+              <><span className="text-gradient">BAQI AI</span> Dashboard</>
+            )}
           </h1>
           <p className="text-muted-foreground mt-1">
-            Here's your financial overview — {user?.risk_profile || 'moderate'} risk profile
+            {dataSource === 'csv'
+              ? `Real bank statement analysis — ${months} months of transaction data`
+              : `Financial overview — ${user?.risk_profile || 'moderate'} risk profile`}
           </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {dataSource === 'csv' && (
+            <Badge variant="secondary" className="bg-blue-50 text-blue-600 border-blue-200">
+              Live Data · USD
+            </Badge>
+          )}
+          {dataSource === 'supabase' && (
+            <Badge variant="secondary" className="bg-emerald-50 text-emerald-600 border-emerald-200">
+              Demo · PKR
+            </Badge>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-xs text-muted-foreground"
+            onClick={() => {
+              localStorage.removeItem('baqi_data_source')
+              localStorage.removeItem('baqi_user_id')
+              window.location.reload()
+            }}
+          >
+            Switch Source
+          </Button>
         </div>
       </div>
 
@@ -172,10 +259,10 @@ export default function Dashboard() {
                     </linearGradient>
                   </defs>
                   <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={(v: any) => `${(v/1000).toFixed(0)}k`} />
+                  <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={(v: any) => `${cur === 'PKR' ? '' : '$'}${(v/1000).toFixed(0)}k`} />
                   <Tooltip
                     contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', background: '#fff' }}
-                    formatter={(val: any) => formatPKR(Number(val))}
+                    formatter={(val: any) => fmt(Number(val))}
                   />
                   <Area type="monotone" dataKey="income" stroke="#10b981" strokeWidth={2} fill="url(#green)" />
                   <Area type="monotone" dataKey="spending" stroke="#ef4444" strokeWidth={2} fill="url(#red)" />

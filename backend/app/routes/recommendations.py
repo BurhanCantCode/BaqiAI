@@ -8,6 +8,7 @@ router = APIRouter(prefix="/recommendations", tags=["Recommendations"])
 
 class RecommendationRequest(BaseModel):
     user_id: int
+    source: str | None = None
 
 
 @router.post("/generate")
@@ -21,7 +22,7 @@ async def generate_recommendations(request: RecommendationRequest):
     Takes 30-90 seconds depending on LLM response time.
     """
     try:
-        result = await generate_recommendation(request.user_id)
+        result = await generate_recommendation(request.user_id, source=request.source)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Recommendation failed: {str(e)}")

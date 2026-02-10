@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import AgentPipeline from '@/components/AgentPipeline'
 import { baqiApi } from '@/api/client'
-import { formatPKR } from '@/lib/utils'
+import { formatMoney } from '@/lib/utils'
 import { useApp } from '@/context/AppContext'
 import type { RecommendationResult, PortfolioAllocation } from '@/types'
 import {
@@ -17,21 +17,25 @@ import {
 type Phase = 'idle' | 'agents' | 'loading' | 'result' | 'error'
 
 export default function Invest() {
-  const { userId, refreshPortfolio } = useApp()
+  const { userId, dataSource, analysis, refreshPortfolio } = useApp()
   const [phase, setPhase] = useState<Phase>('idle')
   const [result, setResult] = useState<RecommendationResult | null>(null)
   const [error, setError] = useState('')
   const [investing, setInvesting] = useState(false)
   const [invested, setInvested] = useState(false)
 
+  const cur = analysis?.currency
+  const fmt = (v: number) => formatMoney(v, cur)
+
   const handleGenerate = () => {
-    if (!userId) return
+    const id = userId || 1
+    if (!dataSource) return
     setPhase('agents')
     setResult(null)
     setError('')
 
     // Start the real API call in background
-    baqiApi.generateRecommendation(userId)
+    baqiApi.generateRecommendation(id, dataSource)
       .then(res => {
         setResult(res.data)
       })
@@ -75,7 +79,7 @@ export default function Invest() {
     if (!portfolio.length) return
     setInvesting(true)
     try {
-      await baqiApi.executeInvestment(userId, portfolio)
+      await baqiApi.executeInvestment(userId || 1, portfolio)
       setInvested(true)
       refreshPortfolio()
     } catch {
@@ -108,10 +112,10 @@ export default function Invest() {
             <Sparkles className="w-10 h-10 text-primary" />
           </div>
 
-          {!userId ? (
+          {!dataSource ? (
             <div>
-              <h2 className="text-xl font-bold mb-2">No Account Found</h2>
-              <p className="text-muted-foreground mb-4">Go to Dashboard and click "Try Demo" first</p>
+              <h2 className="text-xl font-bold mb-2">No Data Source Selected</h2>
+              <p className="text-muted-foreground mb-4">Go to Dashboard and choose a data source first</p>
             </div>
           ) : (
             <>
@@ -241,7 +245,7 @@ export default function Invest() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold">{formatPKR(alloc.amount_pkr)}</p>
+                        <p className="font-bold">{fmt(alloc.amount_pkr)}</p>
                         <p className="text-xs text-primary">
                           +{(alloc.expected_return * 100).toFixed(0)}% · {alloc.percentage.toFixed(1)}%
                         </p>
@@ -267,12 +271,12 @@ export default function Invest() {
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <p className="text-sm text-muted-foreground">Total Investment</p>
-                    <p className="text-2xl font-bold">{formatPKR(result.recommendation.total_invested || 0)}</p>
+                    <p className="text-2xl font-bold">{fmt(result.recommendation.total_invested || 0)}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm text-muted-foreground">Monthly BAQI</p>
                     <p className="text-2xl font-bold text-primary">
-                      {formatPKR(result.spending_analysis.monthly_baqi)}
+                      {fmt(result.spending_analysis.monthly_baqi)}
                     </p>
                   </div>
                 </div>
@@ -291,7 +295,7 @@ export default function Invest() {
                     {investing ? (
                       <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Executing...</>
                     ) : (
-                      <><Briefcase className="w-5 h-5 mr-2" /> Invest Now — {formatPKR(result.recommendation.total_invested || 0)}</>
+                      <><Briefcase className="w-5 h-5 mr-2" /> Invest Now — {fmt(result.recommendation.total_invested || 0)}</>
                     )}
                   </Button>
                 )}

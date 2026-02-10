@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { Card } from '@/components/ui/card'
-import { formatPKR, formatPercent } from '@/lib/utils'
+import { formatMoney, formatPercent } from '@/lib/utils'
 import { useApp } from '@/context/AppContext'
 import {
   Briefcase, TrendingUp, TrendingDown, Moon, Loader2
@@ -10,7 +10,9 @@ import {
 const COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#06b6d4', '#ef4444']
 
 export default function Portfolio() {
-  const { portfolio: data, loading } = useApp()
+  const { portfolio: data, analysis, loading } = useApp()
+  const cur = analysis?.currency
+  const fmt = (v: number) => formatMoney(v, cur)
 
   if (loading) {
     return (
@@ -47,11 +49,11 @@ export default function Portfolio() {
       <div className="grid grid-cols-3 gap-3">
         <Card className="p-4 bg-card border-border/50">
           <p className="text-xs text-muted-foreground">Invested</p>
-          <p className="text-lg font-bold">{formatPKR(data.total_invested)}</p>
+          <p className="text-lg font-bold">{fmt(data.total_invested)}</p>
         </Card>
         <Card className="p-4 bg-card border-border/50">
           <p className="text-xs text-muted-foreground">Current Value</p>
-          <p className="text-lg font-bold">{formatPKR(data.current_value)}</p>
+          <p className="text-lg font-bold">{fmt(data.current_value)}</p>
         </Card>
         <Card className={`p-4 border-border/50 ${isPositive ? 'bg-primary/5' : 'bg-destructive/5'}`}>
           <p className="text-xs text-muted-foreground">Return</p>
@@ -82,7 +84,7 @@ export default function Portfolio() {
               <div key={d.name} className="flex items-center gap-2 text-xs">
                 <div className="w-2.5 h-2.5 rounded-full" style={{ background: d.color }} />
                 <span className="text-muted-foreground">{d.name}</span>
-                <span className="ml-auto font-medium">{formatPKR(d.value)}</span>
+                <span className="ml-auto font-medium">{fmt(d.value)}</span>
               </div>
             ))}
           </div>
@@ -116,12 +118,12 @@ export default function Portfolio() {
                       <Moon className="w-3 h-3 text-amber-400" />
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {h.quantity.toFixed(2)} units @ {formatPKR(h.purchase_price)}
+                      {h.quantity.toFixed(2)} units @ {fmt(h.purchase_price)}
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-sm">{formatPKR(h.current_value || h.amount)}</p>
+                  <p className="font-bold text-sm">{fmt(h.current_value || h.amount)}</p>
                   <p className={`text-xs ${(h.return_pct || 0) >= 0 ? 'text-primary' : 'text-destructive'}`}>
                     {formatPercent(h.return_pct || 0)}
                   </p>

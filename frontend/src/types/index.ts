@@ -19,6 +19,8 @@ export interface SpendingAnalysis {
   watery_savings_potential: number
   recommended_investment: number
   monthly_breakdown: MonthlyBreakdown[]
+  currency?: 'USD' | 'PKR'
+  source?: 'csv' | 'supabase'
 }
 
 export interface CategoryBreakdown {
@@ -112,17 +114,26 @@ export interface PortfolioSnapshot {
 }
 
 // Data Exhaust Insights types
+export interface PersonaProfile {
+  archetype: string
+  traits: string[]
+  lifestyle_summary: string
+  financial_type: string
+  spending_personality: string
+}
+
 export interface InsightItem {
   title: string
   description: string
   action: string
-  category: 'behavioral' | 'saving_opportunity' | 'anomaly' | 'trend' | 'optimization'
+  category: 'behavioral' | 'saving_opportunity' | 'anomaly' | 'trend' | 'optimization' | 'lifestyle' | 'personality'
   severity: 'info' | 'warning' | 'opportunity'
-  impact_pkr: number | null
+  impact_amount: number | null
 }
 
 export interface InsightsResponse {
   user_id: number
+  persona: PersonaProfile
   insights: InsightItem[]
   data_exhaust: Record<string, any>
   generated_at: string

@@ -5,6 +5,8 @@ const api = axios.create({
   timeout: 120000,
 })
 
+export type DataSource = 'csv' | 'supabase'
+
 export const baqiApi = {
   // Health
   health: () => api.get('/health'),
@@ -20,12 +22,14 @@ export const baqiApi = {
     api.post(`/users/${id}/risk-quiz`, { answers }),
 
   // Transactions
-  getAnalysis: (userId: number) => api.get(`/transactions/${userId}/analysis`),
-  getTransactions: (userId: number) => api.get(`/transactions/${userId}/list`),
+  getAnalysis: (userId: number, source?: DataSource) =>
+    api.get(`/transactions/${userId}/analysis`, { params: source ? { source } : {} }),
+  getTransactions: (userId: number, source?: DataSource) =>
+    api.get(`/transactions/${userId}/list`, { params: source ? { source } : {} }),
 
   // Recommendations (long-running)
-  generateRecommendation: (userId: number) =>
-    api.post('/recommendations/generate', { user_id: userId }, { timeout: 180000 }),
+  generateRecommendation: (userId: number, source?: DataSource) =>
+    api.post('/recommendations/generate', { user_id: userId, source }, { timeout: 180000 }),
 
   // Investments
   executeInvestment: (userId: number, portfolio: any[]) =>
@@ -36,7 +40,8 @@ export const baqiApi = {
   rebalance: (userId: number) => api.post(`/portfolio/${userId}/rebalance`),
 
   // AI Insights
-  getInsights: (userId: number) => api.get(`/insights/${userId}`, { timeout: 30000 }),
+  getInsights: (userId: number, source?: DataSource) =>
+    api.get(`/insights/${userId}`, { params: source ? { source } : {}, timeout: 120000 }),
 }
 
 export default api

@@ -1,11 +1,9 @@
-import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { baqiApi } from '@/api/client'
 import { formatPKR } from '@/lib/utils'
-import type { SpendingAnalysis } from '@/types'
+import { useApp } from '@/context/AppContext'
 import {
   Home, ShoppingCart, Droplets, TrendingUp, Loader2, BarChart3
 } from 'lucide-react'
@@ -17,17 +15,7 @@ const CATEGORY_CONFIG = {
 }
 
 export default function Analysis() {
-  const [data, setData] = useState<SpendingAnalysis | null>(null)
-  const [loading, setLoading] = useState(true)
-  const userId = Number(localStorage.getItem('baqi_user_id') || '0')
-
-  useEffect(() => {
-    if (!userId) { setLoading(false); return }
-    baqiApi.getAnalysis(userId)
-      .then(res => setData(res.data))
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [userId])
+  const { analysis: data, loading } = useApp()
 
   if (loading) {
     return (

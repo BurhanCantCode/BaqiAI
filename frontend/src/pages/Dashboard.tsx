@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { PieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts'
@@ -7,48 +7,24 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { baqiApi } from '@/api/client'
 import { formatPKR } from '@/lib/utils'
-import type { SpendingAnalysis, User } from '@/types'
+import { useApp } from '@/context/AppContext'
 import {
   TrendingUp, Wallet, PiggyBank, AlertTriangle, Sparkles, ArrowRight, Bot,
-  Loader2, ArrowUpRight
+  Loader2
 } from 'lucide-react'
 
 export default function Dashboard() {
-  const [analysis, setAnalysis] = useState<SpendingAnalysis | null>(null)
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { userId, user, analysis, loading, setUserId, refreshAll } = useApp()
   const [demoLoading, setDemoLoading] = useState(false)
   const navigate = useNavigate()
-
-  const userId = Number(localStorage.getItem('baqi_user_id') || '0')
-
-  useEffect(() => {
-    if (!userId) { setLoading(false); return }
-    loadData()
-  }, [userId])
-
-  const loadData = async () => {
-    try {
-      const [profileRes, analysisRes] = await Promise.all([
-        baqiApi.getProfile(userId),
-        baqiApi.getAnalysis(userId),
-      ])
-      setUser(profileRes.data)
-      setAnalysis(analysisRes.data)
-    } catch {
-      // User might not exist yet
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const handleDemo = async () => {
     setDemoLoading(true)
     try {
       const res = await baqiApi.generateSyntheticData()
       const newUserId = res.data.user_id
-      localStorage.setItem('baqi_user_id', String(newUserId))
-      window.location.reload()
+      setUserId(newUserId)
+      // Context will auto-refresh via useEffect on userId change
     } catch (err) {
       console.error(err)
     } finally {

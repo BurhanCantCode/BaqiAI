@@ -1,11 +1,8 @@
-import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { PieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts'
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { baqiApi } from '@/api/client'
 import { formatPKR, formatPercent } from '@/lib/utils'
-import type { PortfolioData } from '@/types'
+import { useApp } from '@/context/AppContext'
 import {
   Briefcase, TrendingUp, TrendingDown, Moon, Loader2
 } from 'lucide-react'
@@ -13,17 +10,7 @@ import {
 const COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#06b6d4', '#ef4444']
 
 export default function Portfolio() {
-  const [data, setData] = useState<PortfolioData | null>(null)
-  const [loading, setLoading] = useState(true)
-  const userId = Number(localStorage.getItem('baqi_user_id') || '0')
-
-  useEffect(() => {
-    if (!userId) { setLoading(false); return }
-    baqiApi.getPortfolio(userId)
-      .then(res => setData(res.data))
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [userId])
+  const { portfolio: data, loading } = useApp()
 
   if (loading) {
     return (

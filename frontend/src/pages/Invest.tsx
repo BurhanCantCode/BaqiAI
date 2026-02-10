@@ -7,6 +7,7 @@ import { Progress } from '@/components/ui/progress'
 import AgentPipeline from '@/components/AgentPipeline'
 import { baqiApi } from '@/api/client'
 import { formatPKR } from '@/lib/utils'
+import { useApp } from '@/context/AppContext'
 import type { RecommendationResult, PortfolioAllocation } from '@/types'
 import {
   Sparkles, Loader2, CheckCircle2, Moon, TrendingUp,
@@ -16,12 +17,12 @@ import {
 type Phase = 'idle' | 'agents' | 'loading' | 'result' | 'error'
 
 export default function Invest() {
+  const { userId, refreshPortfolio } = useApp()
   const [phase, setPhase] = useState<Phase>('idle')
   const [result, setResult] = useState<RecommendationResult | null>(null)
   const [error, setError] = useState('')
   const [investing, setInvesting] = useState(false)
   const [invested, setInvested] = useState(false)
-  const userId = Number(localStorage.getItem('baqi_user_id') || '0')
 
   const handleGenerate = () => {
     if (!userId) return
@@ -76,6 +77,7 @@ export default function Invest() {
     try {
       await baqiApi.executeInvestment(userId, portfolio)
       setInvested(true)
+      refreshPortfolio()
     } catch {
       setError('Investment execution failed')
     } finally {

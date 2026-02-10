@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import health, users, transactions, demo
+from app.routes import health, users, transactions, demo, recommendations
 
 app = FastAPI(
     title="BAQI AI",
@@ -22,3 +22,4 @@ app.include_router(health.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
 app.include_router(transactions.router, prefix="/api")
 app.include_router(demo.router, prefix="/api")
+app.include_router(recommendations.router, prefix="/api")

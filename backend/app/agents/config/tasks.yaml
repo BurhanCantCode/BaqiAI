@@ -1,0 +1,82 @@
+analyze_spending:
+  description: >
+    Analyze the spending data provided below for this user.
+    Categorize all transactions into fixed, discretionary, and watery spending.
+    Calculate the monthly baqi (investable surplus).
+    Identify the top 3 areas where spending can be reduced.
+
+    Spending Analysis Data:
+    {spending_data}
+
+    User monthly income: PKR {income}
+  expected_output: >
+    A JSON object with keys: total_income (float), total_spending (float),
+    baqi_amount (float), fixed_pct (float), discretionary_pct (float),
+    watery_pct (float), top_reductions (list of 3 strings with specific
+    merchant names and PKR amounts that could be saved).
+  agent: spending_analyzer
+
+assess_risk:
+  description: >
+    Based on the user profile below, determine their investment risk profile.
+
+    User age: {age}
+    Monthly income: PKR {income}
+    Risk quiz answers (1-5 scale): {quiz_answers}
+    Risk profile from quiz: {risk_profile}
+    Baqi amount available: PKR {baqi_amount}
+
+    Provide specific allocation percentages for equity, fixed income,
+    and mutual funds based on the risk profile.
+  expected_output: >
+    A JSON object with keys: risk_category (conservative/moderate/aggressive),
+    risk_score (1-10), equity_pct (float 0-1), fixed_income_pct (float 0-1),
+    mutual_fund_pct (float 0-1), rationale (string explaining the assessment).
+  agent: risk_profiler
+
+analyze_market:
+  description: >
+    Assess current PSX market conditions for Pakistani investors.
+    Consider KSE-100 trends, SBP policy rate, inflation, and sector performance.
+    Identify the top 3-5 sectors for investment right now.
+    Flag any major risks.
+  expected_output: >
+    A JSON object with keys: market_outlook (bullish/neutral/bearish),
+    kse100_trend (string), top_sectors (list of strings),
+    risks (list of strings), opportunities (list of strings).
+  agent: market_sentiment
+
+screen_halal:
+  description: >
+    The user has halal_preference = {halal_preference}.
+    Screen the following stock tickers for Shariah compliance: {candidate_tickers}.
+    Use KMI-30 index components and standard Islamic screening criteria.
+    For each ticker, indicate if it is halal and provide brief reasoning.
+  expected_output: >
+    A JSON object with keys: screened_stocks (list of objects, each with
+    ticker, is_halal (bool), reason (string)), compliant_count (int),
+    total_screened (int).
+  agent: halal_compliance
+
+generate_recommendation:
+  description: >
+    Based on all the analysis below, construct a specific investment portfolio
+    for this Pakistani customer.
+
+    Available amount: PKR {baqi_amount}
+    Risk profile: {risk_profile} (equity {equity_pct}%, fixed_income {fixed_income_pct}%, mutual_fund {mutual_fund_pct}%)
+    Halal preference: {halal_preference}
+    Market outlook: {market_outlook}
+    Top sectors: {top_sectors}
+    PSX stock predictions: {psx_predictions}
+    Halal screened stocks: {halal_stocks}
+
+    Construct a portfolio with 4-6 specific allocations.
+    Each allocation must have: asset_name, ticker, asset_type (stock/mutual_fund/fixed_income),
+    amount_pkr, percentage, expected_return (annual), is_halal, and rationale.
+    Include a one-paragraph summary explaining the overall strategy.
+  expected_output: >
+    A JSON object with keys: portfolio (list of allocation objects),
+    total_invested (float), expected_annual_return (float),
+    summary (string with 2-3 sentences).
+  agent: investment_agent

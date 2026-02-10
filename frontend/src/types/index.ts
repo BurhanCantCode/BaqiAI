@@ -111,6 +111,23 @@ export interface PortfolioSnapshot {
   return_percentage: number
 }
 
+// Data Exhaust Insights types
+export interface InsightItem {
+  title: string
+  description: string
+  action: string
+  category: 'behavioral' | 'saving_opportunity' | 'anomaly' | 'trend' | 'optimization'
+  severity: 'info' | 'warning' | 'opportunity'
+  impact_pkr: number | null
+}
+
+export interface InsightsResponse {
+  user_id: number
+  insights: InsightItem[]
+  data_exhaust: Record<string, any>
+  generated_at: string
+}
+
 // Agent pipeline types
 export interface AgentStep {
   id: string

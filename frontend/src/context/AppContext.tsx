@@ -1,15 +1,18 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
 import { baqiApi } from '@/api/client'
-import type { User, SpendingAnalysis, PortfolioData } from '@/types'
+import type { User, SpendingAnalysis, PortfolioData, InsightsResponse } from '@/types'
 
 interface AppState {
   userId: number
   user: User | null
   analysis: SpendingAnalysis | null
   portfolio: PortfolioData | null
+  insights: InsightsResponse | null
+  insightsLoading: boolean
   loading: boolean
   refreshAll: () => Promise<void>
   refreshPortfolio: () => Promise<void>
+  fetchInsights: () => Promise<void>
   setUserId: (id: number) => void
 }
 
@@ -22,6 +25,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [analysis, setAnalysis] = useState<SpendingAnalysis | null>(null)
   const [portfolio, setPortfolio] = useState<PortfolioData | null>(null)
+  const [insights, setInsights] = useState<InsightsResponse | null>(null)
+  const [insightsLoading, setInsightsLoading] = useState(false)
   const [loading, setLoading] = useState(true)
 
   const setUserId = useCallback((id: number) => {
@@ -62,14 +67,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [userId])
 
+  const fetchInsights = useCallback(async () => {
+    if (!userId) return
+    setInsightsLoading(true)
+    try {
+      const res = await baqiApi.getInsights(userId)
+      setInsights(res.data)
+    } catch {
+      // Insights generation may fail
+    } finally {
+      setInsightsLoading(false)
+    }
+  }, [userId])
+
   useEffect(() => {
     refreshAll()
   }, [refreshAll])
 
   return (
     <AppContext.Provider value={{
-      userId, user, analysis, portfolio, loading,
-      refreshAll, refreshPortfolio, setUserId,
+      userId, user, analysis, portfolio, insights, insightsLoading, loading,
+      refreshAll, refreshPortfolio, fetchInsights, setUserId,
     }}>
       {children}
     </AppContext.Provider>

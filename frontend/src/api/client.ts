@@ -34,6 +34,9 @@ export const baqiApi = {
   // Portfolio
   getPortfolio: (userId: number) => api.get(`/portfolio/${userId}`),
   rebalance: (userId: number) => api.post(`/portfolio/${userId}/rebalance`),
+
+  // AI Insights
+  getInsights: (userId: number) => api.get(`/insights/${userId}`, { timeout: 30000 }),
 }
 
 export default api

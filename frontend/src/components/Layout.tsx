@@ -1,12 +1,13 @@
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import {
-  LayoutDashboard, TrendingUp, Briefcase, BarChart3, Bot, Bell, Search, Settings
+  LayoutDashboard, TrendingUp, Briefcase, BarChart3, Bot, Bell, Search, Settings, Brain
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 const NAV_ITEMS = [
   { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
+  { path: '/insights', icon: Brain, label: 'AI Insights' },
   { path: '/invest', icon: TrendingUp, label: 'Invest' },
   { path: '/portfolio', icon: Briefcase, label: 'Portfolio' },
   { path: '/analysis', icon: BarChart3, label: 'Analysis' },

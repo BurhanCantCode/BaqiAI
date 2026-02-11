@@ -6,6 +6,7 @@ import Invest from '@/pages/Invest'
 import Portfolio from '@/pages/Portfolio'
 import Analysis from '@/pages/Analysis'
 import Insights from '@/pages/Insights'
+import Telegram from '@/pages/Telegram'
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
           <Route path="/invest" element={<Invest />} />
           <Route path="/portfolio" element={<Portfolio />} />
           <Route path="/analysis" element={<Analysis />} />
+          <Route path="/telegram" element={<Telegram />} />
         </Routes>
         </Layout>
       </AppProvider>

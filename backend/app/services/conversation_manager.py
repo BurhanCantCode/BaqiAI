@@ -1,4 +1,4 @@
-"""WhatsApp conversation state machine for BAQI AI."""
+"""Conversation state machine for BAQI AI (Telegram / generic chat)."""
 
 import json
 from app.database import supabase
@@ -20,7 +20,7 @@ def process_message(phone: str, message: str) -> str:
     """
     Process incoming WhatsApp message and return response.
     Implements a state machine flow:
-    WELCOME → REGISTERED → RISK_QUIZ → ANALYZING → RECOMMENDATION_READY
+    WELCOME -> REGISTERED -> RISK_QUIZ -> ANALYZING -> RECOMMENDATION_READY
     """
     conv = get_state(phone)
     state = conv["state"]
@@ -49,8 +49,8 @@ def process_message(phone: str, message: str) -> str:
 
 def _welcome_message() -> str:
     return (
-        "Assalam o Alaikum! 🌙\n\n"
-        "I'm *BAQI AI* — your personal Islamic investment assistant.\n\n"
+        "Assalam o Alaikum! \n\n"
+        "I'm *BAQI AI* - your personal Islamic investment assistant.\n\n"
         "I analyze your spending, find your *baqi* (leftover money), "
         "and recommend Shariah-compliant investments on PSX.\n\n"
         "What's your name?"
@@ -71,7 +71,7 @@ def _handle_name(conv: dict, phone: str, name: str) -> str:
     name = name.strip().title()
 
     # Check if user already exists by phone
-    clean_phone = phone.replace("whatsapp:", "")
+    clean_phone = phone.replace("whatsapp:", "").replace("telegram:", "")
     existing = supabase.table("users").select("*").eq("phone", clean_phone).execute()
 
     if existing.data:
@@ -79,12 +79,12 @@ def _handle_name(conv: dict, phone: str, name: str) -> str:
         conv["user_id"] = user["id"]
         conv["state"] = "REGISTERED"
         return (
-            f"Welcome back, *{user['name']}*! 👋\n\n"
+            f"Welcome back, *{user['name']}*! \n\n"
             f"I already have your data on file.\n\n"
             f"Would you like to:\n"
-            f"1️⃣ *Analyze* — View your spending analysis\n"
-            f"2️⃣ *Quiz* — Retake the risk assessment\n"
-            f"3️⃣ *Recommend* — Get AI investment recommendations\n\n"
+            f"1. *Analyze* - View your spending analysis\n"
+            f"2. *Quiz* - Retake the risk assessment\n"
+            f"3. *Recommend* - Get AI investment recommendations\n\n"
             f"Reply with a number or keyword."
         )
 
@@ -109,12 +109,12 @@ def _handle_name(conv: dict, phone: str, name: str) -> str:
 
     conv["state"] = "REGISTERED"
     return (
-        f"Nice to meet you, *{name}*! ✨\n\n"
+        f"Nice to meet you, *{name}*! \n\n"
         f"I've set up your account and loaded 6 months of sample transaction data.\n\n"
         f"Would you like to:\n"
-        f"1️⃣ *Analyze* — View your spending breakdown\n"
-        f"2️⃣ *Quiz* — Take the risk assessment quiz\n"
-        f"3️⃣ *Recommend* — Get AI investment recommendations\n\n"
+        f"1. *Analyze* - View your spending breakdown\n"
+        f"2. *Quiz* - Take the risk assessment quiz\n"
+        f"3. *Recommend* - Get AI investment recommendations\n\n"
         f"Reply with a number or keyword."
     )
 
@@ -138,18 +138,18 @@ def _handle_registered(conv: dict, phone: str, msg: str) -> str:
         monthly_baqi = round(baqi / 6, 0)
 
         return (
-            f"📊 *Your Spending Analysis*\n\n"
-            f"💰 Total Income: PKR {analysis['total_income']:,.0f}\n"
-            f"💸 Total Spending: PKR {analysis['total_spending']:,.0f}\n"
-            f"📈 Savings Rate: {analysis['savings_rate']:.1f}%\n\n"
+            f"Your Spending Analysis\n\n"
+            f"Total Income: PKR {analysis['total_income']:,.0f}\n"
+            f"Total Spending: PKR {analysis['total_spending']:,.0f}\n"
+            f"Savings Rate: {analysis['savings_rate']:.1f}%\n\n"
             f"*Breakdown:*\n"
-            f"🏠 Fixed: {analysis['fixed']['percentage']:.1f}%\n"
-            f"🛒 Discretionary: {analysis['discretionary']['percentage']:.1f}%\n"
-            f"💧 Watery (reducible): {analysis['watery']['percentage']:.1f}%\n\n"
-            f"✅ *Your BAQI (investable surplus): PKR {monthly_baqi:,.0f}/month*\n\n"
+            f"Fixed: {analysis['fixed']['percentage']:.1f}%\n"
+            f"Discretionary: {analysis['discretionary']['percentage']:.1f}%\n"
+            f"Watery (reducible): {analysis['watery']['percentage']:.1f}%\n\n"
+            f"Your BAQI (investable surplus): PKR {monthly_baqi:,.0f}/month\n\n"
             f"Reply:\n"
-            f"2️⃣ *Quiz* — Take risk assessment\n"
-            f"3️⃣ *Recommend* — Get AI recommendations"
+            f"2. *Quiz* - Take risk assessment\n"
+            f"3. *Recommend* - Get AI recommendations"
         )
 
     elif msg in ("2", "quiz", "risk"):
@@ -174,9 +174,9 @@ def _handle_registered(conv: dict, phone: str, msg: str) -> str:
 
     return (
         "I didn't catch that. Reply with:\n"
-        "1️⃣ *Analyze* — Spending analysis\n"
-        "2️⃣ *Quiz* — Risk assessment\n"
-        "3️⃣ *Recommend* — AI recommendations"
+        "1. *Analyze* - Spending analysis\n"
+        "2. *Quiz* - Risk assessment\n"
+        "3. *Recommend* - AI recommendations"
     )
 
 
@@ -207,7 +207,7 @@ RISK_QUESTIONS = [
 def _quiz_question(index: int) -> str:
     q = RISK_QUESTIONS[index]
     options = "\n".join(f"{i+1}. {opt}" for i, opt in enumerate(q["options"]))
-    return f"📝 *Question {index + 1}/5*\n\n{q['question']}\n\n{options}\n\nReply with a number (1-5)."
+    return f"Question {index + 1}/5\n\n{q['question']}\n\n{options}\n\nReply with a number (1-5)."
 
 
 def _handle_quiz(conv: dict, phone: str, msg: str) -> str:
@@ -236,13 +236,13 @@ def _handle_quiz(conv: dict, phone: str, msg: str) -> str:
 
     if adjusted_score <= 2.0:
         profile = "conservative"
-        emoji = "🛡️"
+        emoji = "[Safe]"
     elif adjusted_score <= 3.5:
         profile = "moderate"
-        emoji = "⚖️"
+        emoji = "[Balanced]"
     else:
         profile = "aggressive"
-        emoji = "🚀"
+        emoji = "[Growth]"
 
     # Save to DB
     supabase.table("users").update({"risk_profile": profile}).eq("id", conv["user_id"]).execute()
@@ -252,14 +252,14 @@ def _handle_quiz(conv: dict, phone: str, msg: str) -> str:
     conv["data"]["risk_score"] = round(adjusted_score, 1)
 
     return (
-        f"✅ *Risk Assessment Complete!*\n\n"
+        f"Risk Assessment Complete!\n\n"
         f"{emoji} Your profile: *{profile.upper()}*\n"
-        f"📊 Risk score: {adjusted_score:.1f}/5.0\n\n"
+        f"Risk score: {adjusted_score:.1f}/5.0\n\n"
         f"This means your recommended allocation is:\n"
         + _allocation_text(profile) +
         f"\n\nReply:\n"
-        f"3️⃣ *Recommend* — Get AI investment picks\n"
-        f"*Menu* — Back to main menu"
+        f"3. *Recommend* - Get AI investment picks\n"
+        f"*Menu* - Back to main menu"
     )
 
 
@@ -285,9 +285,9 @@ def _handle_quiz_done(conv: dict, phone: str, msg: str) -> str:
         conv["state"] = "REGISTERED"
         return (
             "What would you like to do?\n"
-            "1️⃣ *Analyze* — Spending analysis\n"
-            "2️⃣ *Quiz* — Retake risk assessment\n"
-            "3️⃣ *Recommend* — AI recommendations"
+            "1. *Analyze* - Spending analysis\n"
+            "2. *Quiz* - Retake risk assessment\n"
+            "3. *Recommend* - AI recommendations"
         )
     return "Reply *3* for recommendations or *menu* to go back."
 
@@ -297,9 +297,9 @@ def _handle_recommendation(conv: dict, phone: str, msg: str) -> str:
         conv["state"] = "REGISTERED"
         return (
             "What would you like to do?\n"
-            "1️⃣ *Analyze* — Spending analysis\n"
-            "2️⃣ *Quiz* — Risk assessment\n"
-            "3️⃣ *Recommend* — AI recommendations"
+            "1. *Analyze* - Spending analysis\n"
+            "2. *Quiz* - Risk assessment\n"
+            "3. *Recommend* - AI recommendations"
         )
     return (
         f"Your user ID is: *{conv['user_id']}*\n\n"

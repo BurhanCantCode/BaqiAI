@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { path: '/portfolio', icon: Briefcase, label: 'Portfolio' },
   { path: '/analysis', icon: BarChart3, label: 'Analysis' },
   { path: '/telegram', icon: Send, label: 'Telegram' },
+  { path: '/admin', icon: Settings, label: 'Admin' },
 ]
 
 export default function Layout({ children }: { children: React.ReactNode }) {

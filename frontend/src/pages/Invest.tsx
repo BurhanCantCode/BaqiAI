@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -12,21 +12,22 @@ import { GlowingBorder } from '@/components/ui/glowing-border'
 import { MovingBorderButton } from '@/components/ui/moving-border'
 import { Meteors } from '@/components/ui/meteors'
 import { AnimatedCounter } from '@/components/ui/animated-counter'
-import type { RecommendationResult, PortfolioAllocation } from '@/types'
+import type { PortfolioAllocation } from '@/types'
 import {
   Sparkles, Loader2, CheckCircle2, Moon, TrendingUp,
   ArrowRight, Briefcase, AlertCircle
 } from 'lucide-react'
 
-type Phase = 'idle' | 'agents' | 'loading' | 'result' | 'error'
+const API_URL = import.meta.env.VITE_API_URL || '/api'
 
 export default function Invest() {
-  const { userId, dataSource, analysis, refreshPortfolio } = useApp()
-  const [phase, setPhase] = useState<Phase>('idle')
-  const [result, setResult] = useState<RecommendationResult | null>(null)
-  const [error, setError] = useState('')
-  const [investing, setInvesting] = useState(false)
-  const [invested, setInvested] = useState(false)
+  const {
+    userId, dataSource, analysis, refreshPortfolio,
+    investPhase: phase, setInvestPhase: setPhase,
+    investResult: result, setInvestResult: setResult,
+    investError: error, setInvestError: setError,
+    invested, setInvested,
+  } = useApp()
 
   const cur = analysis?.currency
   const fmt = (v: number) => formatMoney(v, cur)
@@ -65,7 +66,7 @@ export default function Invest() {
         setPhase(prev => prev === 'loading' ? 'loading' : prev)
       }, 120000)
     }
-  }, [result, error])
+  }, [result, error, setPhase])
 
   if (phase === 'loading' && result) setPhase('result')
   if (phase === 'loading' && error) setPhase('error')
@@ -75,15 +76,26 @@ export default function Invest() {
 
   const handleInvest = async () => {
     if (!portfolio.length) return
-    setInvesting(true)
     try {
       await baqiApi.executeInvestment(userId || 1, portfolio)
       setInvested(true)
       refreshPortfolio()
+
+      // Send fun Telegram notification about the investment
+      try {
+        const totalInvested = result?.recommendation?.total_invested || 0
+        const expectedReturn = result?.recommendation?.expected_annual_return || 0
+        const holdings = portfolio.map((a: PortfolioAllocation) => a.asset_name).join(', ')
+
+        await fetch(
+          `${API_URL}/admin/notify-investment?user_id=${userId || 1}&total=${totalInvested}&expected_return=${(expectedReturn * 100).toFixed(1)}&holdings=${encodeURIComponent(holdings)}`,
+          { method: 'POST' }
+        )
+      } catch {
+        // Telegram notification is non-critical
+      }
     } catch {
       setError('Investment execution failed')
-    } finally {
-      setInvesting(false)
     }
   }
 
@@ -288,14 +300,9 @@ export default function Invest() {
                 ) : (
                   <Button
                     onClick={handleInvest}
-                    disabled={investing}
                     className="w-full bg-[#A3B570] hover:bg-[#8A9E5C] text-[#1B211A] font-semibold py-6 text-lg rounded-xl glow-sage"
                   >
-                    {investing ? (
-                      <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Executing...</>
-                    ) : (
-                      <><Briefcase className="w-5 h-5 mr-2" /> Invest Now — {fmt(result.recommendation.total_invested || 0)}</>
-                    )}
+                    <Briefcase className="w-5 h-5 mr-2" /> Invest Now — {fmt(result.recommendation.total_invested || 0)}
                   </Button>
                 )}
 

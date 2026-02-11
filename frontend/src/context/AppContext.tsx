@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
 import { baqiApi, type DataSource } from '@/api/client'
-import type { User, SpendingAnalysis, PortfolioData, InsightsResponse } from '@/types'
+import type { User, SpendingAnalysis, PortfolioData, InsightsResponse, RecommendationResult } from '@/types'
+
+type InvestPhase = 'idle' | 'agents' | 'loading' | 'result' | 'error'
 
 interface AppState {
   userId: number
@@ -17,6 +19,15 @@ interface AppState {
   fetchInsights: () => Promise<void>
   setUserId: (id: number) => void
   switchDataSource: (source: DataSource, newUserId?: number) => void
+  // Invest page state (persisted across navigation)
+  investPhase: InvestPhase
+  setInvestPhase: (phase: InvestPhase) => void
+  investResult: RecommendationResult | null
+  setInvestResult: (result: RecommendationResult | null) => void
+  investError: string
+  setInvestError: (error: string) => void
+  invested: boolean
+  setInvested: (invested: boolean) => void
 }
 
 const AppContext = createContext<AppState | null>(null)
@@ -36,6 +47,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [insightsError, setInsightsError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
+  // Invest page state — lives in context so it survives navigation
+  const [investPhase, setInvestPhase] = useState<InvestPhase>('idle')
+  const [investResult, setInvestResult] = useState<RecommendationResult | null>(null)
+  const [investError, setInvestError] = useState('')
+  const [invested, setInvested] = useState(false)
+
   const setUserId = useCallback((id: number) => {
     localStorage.setItem('baqi_user_id', String(id))
     setUserIdState(id)
@@ -50,6 +67,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setInsightsError(null)
     setPortfolio(null)
     setUser(null)
+    // Reset invest state for new data source
+    setInvestPhase('idle')
+    setInvestResult(null)
+    setInvestError('')
+    setInvested(false)
     if (newUserId !== undefined) {
       setUserId(newUserId)
     }
@@ -129,6 +151,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     <AppContext.Provider value={{
       userId, user, analysis, portfolio, insights, insightsLoading, insightsError, loading,
       dataSource, refreshAll, refreshPortfolio, fetchInsights, setUserId, switchDataSource,
+      investPhase, setInvestPhase, investResult, setInvestResult,
+      investError, setInvestError, invested, setInvested,
     }}>
       {children}
     </AppContext.Provider>

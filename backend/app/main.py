@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import health, users, transactions, demo, recommendations, investments, portfolio, telegram, upload, insights, psx
+from app.routes import health, users, transactions, demo, recommendations, investments, portfolio, telegram, upload, insights, psx, admin
 from app.services.telegram_bot import start_bot, stop_bot
 
 
@@ -41,3 +41,4 @@ app.include_router(portfolio.router, prefix="/api")
 app.include_router(telegram.router, prefix="/api")
 app.include_router(insights.router, prefix="/api")
 app.include_router(psx.router, prefix="/api")
+app.include_router(admin.router, prefix="/api")

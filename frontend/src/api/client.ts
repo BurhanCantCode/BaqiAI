@@ -42,6 +42,15 @@ export const baqiApi = {
   // AI Insights
   getInsights: (userId: number, source?: DataSource) =>
     api.get(`/insights/${userId}`, { params: source ? { source } : {}, timeout: 120000 }),
+
+  // Admin
+  getAdminUsers: () => api.get('/admin/users'),
+  simulateTransaction: (data: { user_id: number; merchant: string; amount: number }) =>
+    api.post('/admin/simulate-transaction', null, { params: data }),
+  sendWeeklyReport: (userId: number) =>
+    api.post('/admin/send-weekly-report', null, { params: { user_id: userId } }),
+  sendNotification: (data: { user_id: number; message: string }) =>
+    api.post('/admin/send-notification', null, { params: data }),
 }
 
 export default api

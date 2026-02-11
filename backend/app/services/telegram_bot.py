@@ -110,24 +110,26 @@ def _format_spending_alerts(analysis: dict) -> str:
     """Generate overspending alerts from analysis data."""
     alerts = []
     currency = analysis.get("currency", "PKR")
+    months = len(analysis.get("monthly_breakdown", [])) or 1
 
     # Check watery spending (reducible expenses)
     watery = analysis.get("watery", {})
     watery_pct = watery.get("percentage", 0)
     if watery_pct > 30:
+        monthly_watery = round(watery.get("total", 0) / months)
         alerts.append(
-            f"!! High discretionary spending! Your reducible expenses are "
-            f"{watery_pct:.1f}% of total spending."
+            f"!! High discretionary spending! ~{currency} {monthly_watery:,}/month "
+            f"on reducible expenses ({watery_pct:.1f}% of spending)."
         )
 
-    # Check top watery merchants for overspending
+    # Check top watery merchants — show monthly averages
     watery_items = watery.get("items", [])
     for item in watery_items[:3]:
         merchant = item["merchant"]
-        total = item["total"]
-        if total > 100:  # Significant amount
+        monthly_avg = round(item["total"] / months)
+        if monthly_avg > 50:  # Significant monthly amount
             alerts.append(
-                f"You've spent *{currency} {total:,.0f}* on *{merchant}*"
+                f"~*{currency} {monthly_avg:,}/month* on *{merchant}*"
             )
 
     # Savings rate warning
@@ -210,15 +212,18 @@ async def cmd_balance(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
 
     currency = analysis.get("currency", "PKR")
     months = len(analysis.get("monthly_breakdown", [])) or 1
-    monthly_baqi = round(analysis["baqi_amount"] / months, 0)
+    monthly_income = round(analysis["total_income"] / months)
+    monthly_spending = round(analysis["total_spending"] / months)
+    monthly_baqi = round(analysis["baqi_amount"] / months)
+    monthly_watery_potential = round(analysis["watery_savings_potential"] / months)
 
     await update.message.reply_text(
-        f"💰 *Your Financial Summary*\n\n"
-        f"📥 Total Income: {currency} {analysis['total_income']:,.0f}\n"
-        f"📤 Total Spending: {currency} {analysis['total_spending']:,.0f}\n"
+        f"💰 *Your Monthly Financial Summary*\n\n"
+        f"📥 Avg Monthly Income: {currency} {monthly_income:,}\n"
+        f"📤 Avg Monthly Spending: {currency} {monthly_spending:,}\n"
         f"📈 Savings Rate: {analysis['savings_rate']:.1f}%\n\n"
-        f"✅ *Your BAQI (investable surplus): {currency} {monthly_baqi:,.0f}/month*\n\n"
-        f"💡 Potential extra savings: {currency} {analysis['watery_savings_potential']:,.0f} "
+        f"✅ *Your BAQI (investable surplus): {currency} {monthly_baqi:,}/month*\n\n"
+        f"💡 Potential extra savings: {currency} {monthly_watery_potential:,}/month "
         f"by reducing discretionary spending by 50%",
         parse_mode="Markdown",
     )
@@ -239,22 +244,26 @@ async def cmd_spending(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
         return
 
     currency = analysis.get("currency", "PKR")
+    months = len(analysis.get("monthly_breakdown", [])) or 1
     alerts = _format_spending_alerts(analysis)
 
-    # Top merchants per category
+    # Top merchants per category — show monthly averages
     def _top(items, n=3):
         return "\n".join(
-            f"  • {it['merchant']}: {currency} {it['total']:,.0f}"
+            f"  • {it['merchant']}: ~{currency} {round(it['total'] / months):,}/mo"
             for it in items[:n]
         ) or "  (none)"
 
+    def _monthly(cat):
+        return round(analysis[cat]["total"] / months)
+
     await update.message.reply_text(
-        f"📊 *Spending Breakdown*\n\n"
-        f"🏠 *Fixed:* {analysis['fixed']['percentage']:.1f}%\n"
+        f"📊 *Monthly Spending Breakdown*\n\n"
+        f"🏠 *Fixed:* {analysis['fixed']['percentage']:.1f}% (~{currency} {_monthly('fixed'):,}/mo)\n"
         f"{_top(analysis['fixed']['items'])}\n\n"
-        f"🛒 *Discretionary:* {analysis['discretionary']['percentage']:.1f}%\n"
+        f"🛒 *Discretionary:* {analysis['discretionary']['percentage']:.1f}% (~{currency} {_monthly('discretionary'):,}/mo)\n"
         f"{_top(analysis['discretionary']['items'])}\n\n"
-        f"💧 *Watery (reducible):* {analysis['watery']['percentage']:.1f}%\n"
+        f"💧 *Watery (reducible):* {analysis['watery']['percentage']:.1f}% (~{currency} {_monthly('watery'):,}/mo)\n"
         f"{_top(analysis['watery']['items'])}\n\n"
         f"{'─' * 24}\n"
         f"🔔 *Spending Alerts*\n\n{alerts}",
@@ -336,19 +345,27 @@ async def cmd_help(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def handle_text(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handle free-text messages through the conversation manager."""
+    """Handle free-text messages through the AI chat engine."""
     tg_user = update.effective_user
-    identifier = f"telegram:{tg_user.id}"
-    message = update.message.text
+    user = _get_user_by_telegram(tg_user.id)
+
+    if not user:
+        await update.message.reply_text(
+            "Please send /start first to set up your account!"
+        )
+        return
+
+    # Show typing indicator while Claude thinks
+    await update.message.chat.send_action("typing")
 
     try:
-        response = process_message(identifier, message)
+        from app.services.chat_engine import process_chat
+        response = await process_chat(tg_user.id, update.message.text)
         await update.message.reply_text(response, parse_mode="Markdown")
     except Exception as e:
-        logger.error(f"Error processing message: {e}")
+        logger.error(f"Chat engine error: {e}")
         await update.message.reply_text(
-            "Sorry, I couldn't process that. Try one of the commands:\n"
-            "/balance /spending /insights /help"
+            "Oops, my brain glitched! Try again or use /help for commands."
         )
 
 
@@ -425,3 +442,34 @@ async def stop_bot() -> None:
             print("Telegram bot stopped.")
         except Exception as e:
             logger.error(f"Error stopping Telegram bot: {e}")
+
+
+# ---------------------------------------------------------------------------
+# Public helpers — used by admin endpoints
+# ---------------------------------------------------------------------------
+
+async def send_message(telegram_id: int, text: str, parse_mode: str = "Markdown") -> bool:
+    """Send a proactive message to a user by Telegram ID. Used by admin endpoints."""
+    if not _app or not _running:
+        logger.warning("Cannot send message — bot not running")
+        return False
+    try:
+        await _app.bot.send_message(
+            chat_id=telegram_id,
+            text=text,
+            parse_mode=parse_mode,
+        )
+        return True
+    except Exception as e:
+        logger.error(f"Failed to send message to {telegram_id}: {e}")
+        return False
+
+
+def get_registered_telegram_users() -> list[dict]:
+    """Get all users registered via Telegram (phone field stores telegram_id)."""
+    res = supabase.table("users").select("id, name, phone").execute()
+    return [
+        {"id": u["id"], "name": u["name"], "telegram_id": u["phone"]}
+        for u in (res.data or [])
+        if u.get("phone", "").isdigit()
+    ]

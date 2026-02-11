@@ -1,4 +1,4 @@
-"""CSV file upload endpoint for user bank statements."""
+"""CSV and PDF file upload endpoints for user bank statements."""
 
 import os
 import uuid
@@ -9,6 +9,12 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
 
 from app.services.csv_parser import CSVParser, CSVParseError
+from app.services.pdf_parser import (
+    parse_pdf_with_claude,
+    get_pdf_preview,
+    PDFParseError,
+    PDFServiceUnavailableError,
+)
 
 router = APIRouter(prefix="/upload", tags=["Upload"])
 
@@ -17,8 +23,8 @@ UPLOAD_DIR = Path(__file__).parent.parent.parent / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 # File constraints
-MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
-ALLOWED_EXTENSIONS = {".csv"}
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB (PDFs can be larger)
+ALLOWED_EXTENSIONS = {".csv", ".pdf"}
 
 
 @router.post("/csv")
@@ -229,4 +235,127 @@ async def get_uploaded_csv_info(user_id: int):
         raise HTTPException(
             status_code=500,
             detail=f"Error reading uploaded file: {str(e)}"
+        )
+
+
+# ---------------------------------------------------------------------------
+# PDF upload endpoints
+# ---------------------------------------------------------------------------
+
+@router.post("/pdf")
+async def upload_pdf(
+    file: UploadFile = File(...),
+    user_id: Optional[int] = Form(None),
+):
+    """
+    Upload a PDF bank statement. Claude AI extracts transactions automatically.
+
+    Works with any bank statement format — the LLM handles the parsing.
+    """
+    file_ext = os.path.splitext(file.filename)[1].lower()
+    if file_ext != ".pdf":
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid file type. Only PDF files are allowed. Got: {file_ext}"
+        )
+
+    content = await file.read()
+
+    if len(content) > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=400,
+            detail=f"File too large. Maximum size is {MAX_FILE_SIZE / 1024 / 1024}MB"
+        )
+
+    # Use Claude to extract transactions from the PDF
+    try:
+        transactions = await parse_pdf_with_claude(content)
+    except PDFParseError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except PDFServiceUnavailableError as e:
+        raise HTTPException(status_code=502, detail=str(e))
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error parsing PDF: {str(e)}"
+        )
+
+    if len(transactions) < 2:
+        raise HTTPException(
+            status_code=400,
+            detail=f"PDF must contain at least 2 transactions. Found: {len(transactions)}"
+        )
+
+    # Convert transactions to CSV and save (so existing pipeline can read it)
+    import csv as csv_module
+    import io as io_module
+
+    output = io_module.StringIO()
+    writer = csv_module.DictWriter(output, fieldnames=["date", "name", "amount"])
+    writer.writeheader()
+    writer.writerows(transactions)
+    csv_text = output.getvalue()
+
+    unique_id = str(uuid.uuid4())
+    if user_id:
+        filename = f"user_{user_id}_{unique_id}.csv"
+    else:
+        filename = f"upload_{unique_id}.csv"
+
+    file_path = UPLOAD_DIR / filename
+
+    try:
+        file_path.write_text(csv_text, encoding="utf-8")
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to save extracted data: {str(e)}"
+        )
+
+    dates = sorted([t["date"] for t in transactions])
+    date_range = f"{dates[0]} to {dates[-1]}" if dates else "Unknown"
+
+    return JSONResponse({
+        "message": "PDF parsed successfully",
+        "filename": filename,
+        "file_path": str(file_path),
+        "transaction_count": len(transactions),
+        "date_range": date_range,
+        "upload_id": unique_id,
+        "source_type": "pdf",
+    })
+
+
+@router.post("/pdf/preview")
+async def preview_pdf(file: UploadFile = File(...)):
+    """Preview PDF content before full parsing."""
+    file_ext = os.path.splitext(file.filename)[1].lower()
+    if file_ext != ".pdf":
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid file type. Only PDF files are allowed. Got: {file_ext}"
+        )
+
+    content = await file.read()
+
+    if len(content) > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=400,
+            detail=f"File too large. Maximum size is {MAX_FILE_SIZE / 1024 / 1024}MB"
+        )
+
+    try:
+        preview = get_pdf_preview(content)
+        return JSONResponse({
+            "preview_text": preview["preview_text"],
+            "total_lines": preview["total_lines"],
+            "full_text_length": preview["full_text_length"],
+            "filename": file.filename,
+        })
+    except PDFParseError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Error reading PDF: {str(e)}"
         )

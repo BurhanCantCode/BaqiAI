@@ -380,14 +380,22 @@ async def start_bot() -> None:
     _app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
 
     try:
+        # Initialize and start polling
+        await _app.initialize()
+        await _app.start()
+        await _app.updater.start_polling(drop_pending_updates=True)
+
         # Set bot commands for Telegram menu (non-critical)
-        await _app.bot.set_my_commands([
-            BotCommand("start", "Welcome & account setup"),
-            BotCommand("balance", "Income, expenses & investable surplus"),
-            BotCommand("spending", "Category breakdown + alerts"),
-            BotCommand("insights", "AI financial tips & persona"),
-            BotCommand("help", "Show all commands"),
-        ])
+        try:
+            await _app.bot.set_my_commands([
+                BotCommand("start", "Welcome & account setup"),
+                BotCommand("balance", "Income, expenses & investable surplus"),
+                BotCommand("spending", "Category breakdown + alerts"),
+                BotCommand("insights", "AI financial tips & persona"),
+                BotCommand("help", "Show all commands"),
+            ])
+        except Exception:
+            pass  # Non-critical, menu commands just won't show
 
         # Get bot info
         bot_info = await _app.bot.get_me()
@@ -396,15 +404,11 @@ async def start_bot() -> None:
         logger.info(f"Telegram bot started: @{_bot_username}")
         print(f"Telegram bot started: @{_bot_username} -- https://t.me/{_bot_username}")
     except Exception as e:
-        logger.error(f"Bot setup warning: {e}")
-        _bot_username = "baqiAI_bot" # Fallback from user's message
-        _running = True
-        print(f"Bot started with limited features due to network timeout. You can still message it!")
-
-    # Initialize and start polling
-    await _app.initialize()
-    await _app.start()
-    await _app.updater.start_polling(drop_pending_updates=True)
+        logger.error(f"Telegram bot failed to start: {e}")
+        _bot_username = None
+        _running = False
+        _app = None
+        print(f"Telegram bot could not start: {e}")
 
 
 async def stop_bot() -> None:
@@ -412,9 +416,12 @@ async def stop_bot() -> None:
     global _app, _running
 
     if _app and _running:
-        _running = False
-        await _app.updater.stop()
-        await _app.stop()
-        await _app.shutdown()
-        logger.info("Telegram bot stopped.")
-        print("Telegram bot stopped.")
+        try:
+            _running = False
+            await _app.updater.stop()
+            await _app.stop()
+            await _app.shutdown()
+            logger.info("Telegram bot stopped.")
+            print("Telegram bot stopped.")
+        except Exception as e:
+            logger.error(f"Error stopping Telegram bot: {e}")

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import health, users, transactions, demo, recommendations, investments, portfolio, whatsapp, upload, insights
+from app.routes import health, users, transactions, demo, recommendations, investments, portfolio, whatsapp, upload, insights, psx
 
 app = FastAPI(
     title="BAQI AI",
@@ -28,3 +28,4 @@ app.include_router(investments.router, prefix="/api")
 app.include_router(portfolio.router, prefix="/api")
 app.include_router(whatsapp.router, prefix="/api")
 app.include_router(insights.router, prefix="/api")
+app.include_router(psx.router, prefix="/api")

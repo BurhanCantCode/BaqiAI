@@ -1,0 +1,47 @@
+{
+  "LUCK": {
+    "smoothed_prediction": -3.39,
+    "stable_direction": "NEUTRAL",
+    "raw_prediction": -3.39,
+    "raw_direction": "NEUTRAL",
+    "alpha_used": 0.5,
+    "previous_direction": "NEUTRAL",
+    "timestamp": "2026-02-12T00:46:39.718540"
+  },
+  "FFC": {
+    "smoothed_prediction": -5.99,
+    "stable_direction": "BEARISH",
+    "raw_prediction": -5.99,
+    "raw_direction": "BEARISH",
+    "alpha_used": 0.7,
+    "previous_direction": "NEUTRAL",
+    "timestamp": "2026-02-12T00:55:54.641958"
+  },
+  "OGDC": {
+    "smoothed_prediction": -9.56,
+    "stable_direction": "BEARISH",
+    "raw_prediction": -9.56,
+    "raw_direction": "BEARISH",
+    "alpha_used": 0.7,
+    "previous_direction": "NEUTRAL",
+    "timestamp": "2026-02-12T01:05:59.983384"
+  },
+  "UBL": {
+    "smoothed_prediction": -5.97,
+    "stable_direction": "BEARISH",
+    "raw_prediction": -5.97,
+    "raw_direction": "BEARISH",
+    "alpha_used": 0.7,
+    "previous_direction": "NEUTRAL",
+    "timestamp": "2026-02-12T01:16:26.615420"
+  },
+  "SYS": {
+    "smoothed_prediction": 10.91,
+    "stable_direction": "BULLISH",
+    "raw_prediction": 10.91,
+    "raw_direction": "BULLISH",
+    "alpha_used": 0.7,
+    "previous_direction": "NEUTRAL",
+    "timestamp": "2026-02-12T01:26:41.099386"
+  }
+}

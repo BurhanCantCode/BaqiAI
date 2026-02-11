@@ -138,8 +138,9 @@ class BaqiCrew:
         raw = str(result.raw) if hasattr(result, 'raw') else str(result)
         output = self._extract_json(raw)
 
-        # Validate tickers — ensure they match known data
-        valid_tickers = set(PSX_STOCK_DATA.keys()) | set(MUTUAL_FUNDS.keys())
+        # Validate tickers — ensure they match known data (hardcoded + ML-predicted)
+        ml_tickers = {"LUCK", "FFC", "UBL", "OGDC", "SYS"}
+        valid_tickers = set(PSX_STOCK_DATA.keys()) | set(MUTUAL_FUNDS.keys()) | ml_tickers
         if isinstance(output, dict) and "portfolio" in output:
             for alloc in output["portfolio"]:
                 ticker = alloc.get("ticker", "")

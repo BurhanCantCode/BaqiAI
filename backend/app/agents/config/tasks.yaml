@@ -40,15 +40,20 @@ analyze_market:
     Use ONLY the data provided — do NOT invent statistics, index values,
     or policy rates not present in the data.
 
-    PSX Stock Data (from BAQI Data Engine):
+    PSX Stock Data (from BAQI ML Prediction Engine):
     {psx_data}
 
+    This data includes ML-generated 21-day price predictions with confidence scores
+    for stocks across 5 sectors (Cement, Fertilizer, Energy, Banking, Technology).
+    Stocks with "ml_prediction" fields have real machine-learning forecasts.
+
     Based on this data:
-    - Identify the top 3-5 sectors by predicted return
+    - Identify which stocks have positive 21-day predicted returns (profitable)
+    - Compare ML prediction confidence scores — prefer high-confidence predictions
     - Note the price-to-earnings ratios to flag overvalued stocks
     - Assess overall market conditions based on the spread of predicted returns
-    - Flag risks (e.g. high PE ratios, concentrated sector exposure)
-    - Identify opportunities (e.g. undervalued stocks with strong returns)
+    - Flag risks (e.g. negative predicted returns, low confidence, high PE)
+    - Identify opportunities (e.g. stocks with strong positive ML predictions)
 
     IMPORTANT: Base your analysis ONLY on the data above.
     Do NOT fabricate KSE-100 index values, SBP rates, or inflation figures.
@@ -82,10 +87,12 @@ generate_recommendation:
     Halal preference: {halal_preference}
     Market outlook: {market_outlook}
     Top sectors: {top_sectors}
-    PSX stock predictions: {psx_predictions}
+    PSX stock predictions (ML-powered): {psx_predictions}
     Halal screened stocks: {halal_stocks}
 
     Construct a portfolio with 4-6 specific allocations.
+    PRIORITIZE stocks with positive ML-predicted 21-day returns.
+    Only recommend stocks where the ML model predicts profitable returns.
     CRITICAL: You MUST only use tickers that appear in the PSX stock predictions
     or halal screened stocks data above. Do NOT invent ticker symbols.
     Valid stock tickers include: LUCK, SYS, ENGRO, FFC, OGDC, PPL, MARI, SEARL, TRG, EFERT, FCCL, MEBL, UBL, HBL, DGKC, HUBC, PSO, NESTLE, COLG, UNITY.

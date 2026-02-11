@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import {
   LayoutDashboard, TrendingUp, Briefcase, BarChart3, Bot, Bell, Search, Settings, Brain,
-  FileSpreadsheet, Send
+  FileSpreadsheet, Send, MessageSquare
 } from 'lucide-react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import UploadCSV from '@/components/UploadCSV'
@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { path: '/invest', icon: TrendingUp, label: 'Invest' },
   { path: '/portfolio', icon: Briefcase, label: 'Portfolio' },
   { path: '/analysis', icon: BarChart3, label: 'Analysis' },
+  { path: '/chat', icon: MessageSquare, label: 'AI Chat' },
   { path: '/telegram', icon: Send, label: 'Telegram' },
   { path: '/admin', icon: Settings, label: 'Admin' },
 ]

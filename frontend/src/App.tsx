@@ -8,6 +8,7 @@ import Analysis from '@/pages/Analysis'
 import Insights from '@/pages/Insights'
 import Telegram from '@/pages/Telegram'
 import Admin from '@/pages/Admin'
+import Chat from '@/pages/Chat'
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/analysis" element={<Analysis />} />
           <Route path="/telegram" element={<Telegram />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/chat" element={<Chat />} />
         </Routes>
         </Layout>
       </AppProvider>

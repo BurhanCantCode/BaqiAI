@@ -51,6 +51,13 @@ export const baqiApi = {
     api.post('/admin/send-weekly-report', null, { params: { user_id: userId } }),
   sendNotification: (data: { user_id: number; message: string }) =>
     api.post('/admin/send-notification', null, { params: data }),
+
+  // Chat (Ollama)
+  sendChatMessage: (data: { user_id: number; message: string; data_source: string }) =>
+    api.post('/chat/message', data, { timeout: 120000 }),
+  getChatHistory: (userId: number) => api.get(`/chat/history/${userId}`),
+  clearChatHistory: (userId: number) => api.delete(`/chat/history/${userId}`),
+  getChatStatus: () => api.get('/chat/status'),
 }
 
 export default api

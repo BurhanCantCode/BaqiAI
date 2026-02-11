@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { Upload, FileSpreadsheet, X, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
+import { Upload, FileSpreadsheet, FileText, X, CheckCircle, AlertCircle, Loader2, Sparkles } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -11,8 +11,11 @@ interface UploadCSVProps {
   onCancel: () => void
 }
 
+type FileType = 'csv' | 'pdf' | null
+
 export default function UploadCSV({ userId, onUploadComplete, onCancel }: UploadCSVProps) {
   const [file, setFile] = useState<File | null>(null)
+  const [fileType, setFileType] = useState<FileType>(null)
   const [dragActive, setDragActive] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [preview, setPreview] = useState<any>(null)
@@ -33,7 +36,7 @@ export default function UploadCSV({ userId, onUploadComplete, onCancel }: Upload
     e.preventDefault()
     e.stopPropagation()
     setDragActive(false)
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       await handleFileSelect(e.dataTransfer.files[0])
     }
@@ -49,41 +52,60 @@ export default function UploadCSV({ userId, onUploadComplete, onCancel }: Upload
     setError(null)
     setPreview(null)
 
-    // Validate file type
-    if (!selectedFile.name.toLowerCase().endsWith('.csv')) {
-      setError('Please upload a CSV file')
+    const name = selectedFile.name.toLowerCase()
+    const isCSV = name.endsWith('.csv')
+    const isPDF = name.endsWith('.pdf')
+
+    if (!isCSV && !isPDF) {
+      setError('Please upload a CSV or PDF file')
       return
     }
 
-    // Validate file size (5MB)
-    if (selectedFile.size > 5 * 1024 * 1024) {
-      setError('File size must be less than 5MB')
+    // Validate file size (10MB)
+    if (selectedFile.size > 10 * 1024 * 1024) {
+      setError('File size must be less than 10MB')
       return
     }
 
     setFile(selectedFile)
+    setFileType(isCSV ? 'csv' : 'pdf')
 
     // Get preview
     try {
-      const response = await uploadApi.previewCSV(selectedFile)
-      setPreview(response.data)
+      if (isCSV) {
+        const response = await uploadApi.previewCSV(selectedFile)
+        setPreview(response.data)
+      } else {
+        const response = await uploadApi.previewPDF(selectedFile)
+        setPreview(response.data)
+      }
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to preview CSV file')
+      setError(err.response?.data?.detail || `Failed to preview ${isCSV ? 'CSV' : 'PDF'} file`)
       setFile(null)
+      setFileType(null)
     }
   }
 
   const handleUpload = async () => {
-    if (!file) return
+    if (!file || !fileType) return
 
     setUploading(true)
     setError(null)
 
     try {
-      const response = await uploadApi.uploadCSV(file, userId)
+      let response
+      if (fileType === 'csv') {
+        response = await uploadApi.uploadCSV(file, userId)
+      } else {
+        response = await uploadApi.uploadPDF(file, userId)
+      }
       onUploadComplete(response.data)
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to upload CSV file')
+      if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
+        setError('Browser request timed out before the server responded. Wait 30 seconds and confirm status before retrying to avoid duplicate AI charges.')
+      } else {
+        setError(err.response?.data?.detail || err.message || `Failed to upload ${fileType.toUpperCase()} file`)
+      }
     } finally {
       setUploading(false)
     }
@@ -91,6 +113,7 @@ export default function UploadCSV({ userId, onUploadComplete, onCancel }: Upload
 
   const handleRemoveFile = () => {
     setFile(null)
+    setFileType(null)
     setPreview(null)
     setError(null)
     if (fileInputRef.current) {
@@ -98,13 +121,17 @@ export default function UploadCSV({ userId, onUploadComplete, onCancel }: Upload
     }
   }
 
+  const FileIcon = fileType === 'pdf' ? FileText : FileSpreadsheet
+  const iconColor = fileType === 'pdf' ? 'text-red-600' : 'text-green-600'
+  const iconBg = fileType === 'pdf' ? 'bg-red-50' : 'bg-green-50'
+
   return (
     <div className="space-y-4">
       {/* Title */}
       <div>
         <h2 className="text-2xl font-bold">Upload Bank Statement</h2>
         <p className="text-muted-foreground mt-1">
-          Upload your bank statement CSV to analyze your transactions
+          Upload your bank statement as CSV or PDF — our AI handles any format
         </p>
       </div>
 
@@ -128,33 +155,35 @@ export default function UploadCSV({ userId, onUploadComplete, onCancel }: Upload
             </div>
             <div>
               <p className="text-lg font-semibold mb-1">
-                Drag and drop your CSV file here
+                Drag and drop your bank statement
               </p>
               <p className="text-sm text-muted-foreground">
                 or click to browse files
               </p>
             </div>
-            <Badge variant="secondary" className="text-xs">
-              Maximum file size: 5MB
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="text-xs">CSV</Badge>
+              <Badge variant="secondary" className="text-xs">PDF</Badge>
+              <span className="text-xs text-muted-foreground">Max 10MB</span>
+            </div>
           </div>
           <input
             ref={fileInputRef}
             type="file"
-            accept=".csv"
+            accept=".csv,.pdf"
             onChange={handleFileInput}
             className="hidden"
           />
         </Card>
       )}
 
-      {/* File Preview */}
-      {file && preview && (
+      {/* File Preview — CSV */}
+      {file && preview && fileType === 'csv' && (
         <Card className="p-6 space-y-4">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-lg bg-green-50 flex items-center justify-center">
-                <FileSpreadsheet className="w-6 h-6 text-green-600" />
+              <div className={`w-12 h-12 rounded-lg ${iconBg} flex items-center justify-center`}>
+                <FileIcon className={`w-6 h-6 ${iconColor}`} />
               </div>
               <div>
                 <p className="font-semibold">{file.name}</p>
@@ -228,6 +257,52 @@ export default function UploadCSV({ userId, onUploadComplete, onCancel }: Upload
         </Card>
       )}
 
+      {/* File Preview — PDF */}
+      {file && preview && fileType === 'pdf' && (
+        <Card className="p-6 space-y-4">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`w-12 h-12 rounded-lg ${iconBg} flex items-center justify-center`}>
+                <FileIcon className={`w-6 h-6 ${iconColor}`} />
+              </div>
+              <div>
+                <p className="font-semibold">{file.name}</p>
+                <p className="text-sm text-muted-foreground">
+                  {(file.size / 1024).toFixed(1)} KB · {preview.total_lines} lines extracted
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleRemoveFile}
+              disabled={uploading}
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-primary" />
+            <p className="text-sm font-medium">AI-Powered Extraction</p>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Claude AI will read your bank statement and extract all transactions automatically.
+            Works with any bank format.
+          </p>
+
+          {/* Text Preview */}
+          <div>
+            <p className="text-sm font-medium mb-2">Extracted text preview:</p>
+            <div className="border rounded-lg p-3 bg-muted/30 max-h-48 overflow-y-auto">
+              <pre className="text-xs text-muted-foreground whitespace-pre-wrap font-mono">
+                {preview.preview_text}
+              </pre>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {/* Error Message */}
       {error && (
         <Card className="p-4 bg-red-50 border-red-200">
@@ -251,7 +326,7 @@ export default function UploadCSV({ userId, onUploadComplete, onCancel }: Upload
           {uploading ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Uploading...
+              {fileType === 'pdf' ? 'AI Extracting Transactions...' : 'Uploading...'}
             </>
           ) : (
             <>

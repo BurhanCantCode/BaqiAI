@@ -1,11 +1,17 @@
-"""CrewAI tool for fetching PSX stock predictions."""
+"""CrewAI tool for fetching PSX stock predictions.
+
+Uses ML-predicted data from cache/seed when available,
+falls back to hardcoded data if predictions unavailable.
+"""
 
 import json
+import logging
 from crewai.tools import BaseTool
 
+logger = logging.getLogger(__name__)
 
 # Hardcoded realistic data for top KSE-100 stocks
-# Used as fallback when external PSX prediction API is unavailable
+# Used as fallback when ML predictions are unavailable
 PSX_STOCK_DATA = {
     "LUCK": {"name": "Lucky Cement", "sector": "Cement", "price": 875, "predicted_return": 0.08, "pe_ratio": 12.5},
     "SYS": {"name": "Systems Limited", "sector": "Technology", "price": 520, "predicted_return": 0.12, "pe_ratio": 18.2},
@@ -39,32 +45,53 @@ MUTUAL_FUNDS = {
 }
 
 
+def _load_ml_predictions() -> dict | None:
+    """Try to load ML predictions from cache/seed data."""
+    try:
+        from app.services.psx_prediction_service import get_predictions_for_crew
+        return get_predictions_for_crew()
+    except Exception as e:
+        logger.warning(f"Failed to load ML predictions: {e}")
+        return None
+
+
 class PSXPredictionTool(BaseTool):
     name: str = "PSX Stock Predictor"
     description: str = (
         "Get stock predictions and data for PSX-listed companies. "
         "Input: comma-separated ticker symbols (e.g. 'LUCK,SYS,ENGRO') "
         "or 'ALL' to get all available stocks. "
-        "Returns price, predicted return, sector, and PE ratio for each."
+        "Returns price, predicted return, sector, and PE ratio for each. "
+        "ML-powered predictions include 21-day forecasts with confidence scores."
     )
 
     def _run(self, tickers: str) -> str:
         tickers = tickers.strip().upper()
 
+        # Try ML predictions first, fallback to hardcoded
+        ml_data = _load_ml_predictions()
+        stocks = ml_data["stocks"] if ml_data else PSX_STOCK_DATA
+        funds = MUTUAL_FUNDS
+
+        if ml_data:
+            logger.info(f"Using ML predictions for {list(ml_data['stocks'].keys())}")
+        else:
+            logger.info("Using fallback hardcoded stock data")
+
         if tickers == "ALL":
             result = {
-                "stocks": PSX_STOCK_DATA,
-                "mutual_funds": MUTUAL_FUNDS,
+                "stocks": stocks,
+                "mutual_funds": funds,
             }
             return json.dumps(result, indent=2)
 
         ticker_list = [t.strip() for t in tickers.split(",")]
         result = {}
         for ticker in ticker_list:
-            if ticker in PSX_STOCK_DATA:
-                result[ticker] = PSX_STOCK_DATA[ticker]
-            elif ticker in MUTUAL_FUNDS:
-                result[ticker] = MUTUAL_FUNDS[ticker]
+            if ticker in stocks:
+                result[ticker] = stocks[ticker]
+            elif ticker in funds:
+                result[ticker] = funds[ticker]
             else:
                 result[ticker] = {"error": f"Ticker {ticker} not found in database"}
 

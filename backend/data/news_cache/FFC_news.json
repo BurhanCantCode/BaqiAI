@@ -1,0 +1,82 @@
+{
+  "symbol": "FFC",
+  "company": "Fauji Fertilizer",
+  "news_count": 10,
+  "news_items": [
+    {
+      "title": "Financial Results for the Year Ended 31 Dec 2025",
+      "date": "Jan 29, 2026",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/FFC"
+    },
+    {
+      "title": "Transmission of Quarterly Report - Quarter Ended September 30, 2025",
+      "date": "Oct 31, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/FFC"
+    },
+    {
+      "title": "Transmission of Half Yearly Financial Statements for the Period Ended June 30, 2025",
+      "date": "Aug 22, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/FFC"
+    },
+    {
+      "title": "Financial Results for the Quarter Ended June 30, 2025",
+      "date": "Jul 29, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/FFC"
+    },
+    {
+      "title": "Board Meeting",
+      "date": "Jan 22, 2026",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/FFC"
+    },
+    {
+      "title": "Material Information - 238th Board of Directors Meeting of FFC",
+      "date": "Dec 24, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/FFC"
+    },
+    {
+      "title": "Board Meeting Other Than Financial Results",
+      "date": "Dec 17, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/FFC"
+    },
+    {
+      "title": "Extraordinary General Meeting (EOGM) of Fauji Fertilizer  Company Limited",
+      "date": "Dec 8, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/FFC"
+    },
+    {
+      "title": "Notice of Extraordinary General Meeting",
+      "date": "Nov 14, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/FFC"
+    },
+    {
+      "title": "Disclosure of Interest by a Director CEO, or Executive of a listed company and their Spouses and the Substantial Shareholders u/c 5.6.1.(d) of PSX Regulations",
+      "date": "Feb 10, 2026",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/FFC"
+    }
+  ],
+  "sentiment_score": 0.0,
+  "signal": "NEUTRAL",
+  "signal_simple": "NEUTRAL",
+  "confidence": 0.3,
+  "key_events": [],
+  "price_impact": {
+    "estimate": "unclear",
+    "timeframe": "unclear",
+    "reasoning": "Keyword analysis only"
+  },
+  "summary": "Analysis based on keyword matching (AI unavailable)",
+  "model": "fallback",
+  "analyzed_at": "2026-02-12T04:46:00.825039",
+  "signal_emoji": "\ud83d\udfe1",
+  "cached_at": "2026-02-12T04:46:00.825554"
+}

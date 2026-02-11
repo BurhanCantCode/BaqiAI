@@ -1,0 +1,76 @@
+{
+  "symbol": "LUCK",
+  "company": "Lucky Cement",
+  "news_count": 9,
+  "news_items": [
+    {
+      "title": "Financial Results for the Quarter Ended - December 31, 2025",
+      "date": "Jan 28, 2026",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/LUCK"
+    },
+    {
+      "title": "Transmission of Quarterly Report for the period ended - September 30, 2025",
+      "date": "Oct 30, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/LUCK"
+    },
+    {
+      "title": "Financial Results for the 1st Quarter Ended - September 30, 2025",
+      "date": "Oct 28, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/LUCK"
+    },
+    {
+      "title": "Transmission of Annual Report for the Year Ended -June 30, 2025 - Lucky Cement Limited",
+      "date": "Sep 5, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/LUCK"
+    },
+    {
+      "title": "Financial Results for the year ended - June 30, 2025",
+      "date": "Aug 11, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/LUCK"
+    },
+    {
+      "title": "Board Meeting",
+      "date": "Jan 20, 2026",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/LUCK"
+    },
+    {
+      "title": "Board Meeting Other than Financial Results",
+      "date": "Dec 17, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/LUCK"
+    },
+    {
+      "title": "CERTIFIED TRUE COPY OF THE RESOLUTIONS PASSED IN THE 32nd ANNUAL GENERAL MEETING OF LUCKY CEMENT LIMITED U/C 5.6.9.(b) OF PSX REGULATIONS",
+      "date": "Sep 29, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/LUCK"
+    },
+    {
+      "title": "Notice of Annual General Meeting, Form of Proxy and Ballot Paper - Lucky Cement Limited",
+      "date": "Sep 4, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/LUCK"
+    }
+  ],
+  "sentiment_score": 0.0,
+  "signal": "NEUTRAL",
+  "signal_simple": "NEUTRAL",
+  "confidence": 0.3,
+  "key_events": [],
+  "price_impact": {
+    "estimate": "unclear",
+    "timeframe": "unclear",
+    "reasoning": "Keyword analysis only"
+  },
+  "summary": "Analysis based on keyword matching (AI unavailable)",
+  "model": "fallback",
+  "analyzed_at": "2026-02-12T04:45:06.958208",
+  "signal_emoji": "\ud83d\udfe1",
+  "cached_at": "2026-02-12T04:45:06.958835"
+}

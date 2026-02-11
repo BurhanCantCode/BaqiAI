@@ -14,6 +14,7 @@ from app.services.psx_prediction_service import (
     run_predictions_for_all_sectors,
     PREDICTION_ORDER,
 )
+from app.services.psx_engine.sentiment_analyzer import get_stock_sentiment
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["psx"])
@@ -125,3 +126,36 @@ async def get_current_predictions():
             detail="No predictions available. Run POST /api/psx/run-predictions first, or ensure seed data exists.",
         )
     return predictions
+
+
+# ============================================================================
+# SENTIMENT ANALYSIS ENDPOINTS
+# ============================================================================
+
+
+@router.get("/psx/sentiment/{symbol}")
+async def get_sentiment(symbol: str, use_cache: bool = True):
+    """
+    Get AI-powered sentiment analysis for a PSX stock.
+    Uses Groq (Llama 3.3 70B) to analyze news from PSX, Business Recorder, Dawn, Tribune.
+    Results cached for 4 hours.
+    """
+    symbol = symbol.upper()
+    try:
+        result = get_stock_sentiment(symbol, use_cache=use_cache)
+        return result
+    except Exception as e:
+        logger.error(f"Sentiment analysis failed for {symbol}: {e}")
+        raise HTTPException(status_code=500, detail=f"Sentiment analysis failed: {str(e)}")
+
+
+@router.get("/psx/sentiment-all")
+async def get_all_sentiments():
+    """Get sentiment analysis for all tracked stocks."""
+    results = {}
+    for symbol in PREDICTION_ORDER:
+        try:
+            results[symbol] = get_stock_sentiment(symbol, use_cache=True)
+        except Exception as e:
+            results[symbol] = {"error": str(e), "symbol": symbol}
+    return {"stocks": results, "count": len(results)}

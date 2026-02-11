@@ -44,9 +44,13 @@ from app.services.psx_engine.sota_model import (
     PSXSeasonalFeatures, trend_accuracy, PYWT_AVAILABLE
 )
 
-# News sentiment not available in BAQI AI context
-NEWS_SENTIMENT_AVAILABLE = False
-get_sentiment_score_for_model = None
+# News sentiment integration
+try:
+    from app.services.psx_engine.sentiment_analyzer import get_sentiment_score_for_model
+    NEWS_SENTIMENT_AVAILABLE = True
+except ImportError:
+    NEWS_SENTIMENT_AVAILABLE = False
+    get_sentiment_score_for_model = None
 
 # Williams %R Classifier not copied (optional enhancement)
 WILLIAMS_CLASSIFIER_AVAILABLE = False

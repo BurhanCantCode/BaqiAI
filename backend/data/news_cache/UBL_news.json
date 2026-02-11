@@ -1,0 +1,76 @@
+{
+  "symbol": "UBL",
+  "company": "United Bank",
+  "news_count": 9,
+  "news_items": [
+    {
+      "title": "Transmission of Quarterly Report for the Period Ended September 30, 2025",
+      "date": "Oct 30, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/UBL"
+    },
+    {
+      "title": "Financial Results for the Quarter ended September 30, 2025",
+      "date": "Oct 15, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/UBL"
+    },
+    {
+      "title": "Transmission of Half Yearly Report for the Period Ended June 30, 2025",
+      "date": "Sep 1, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/UBL"
+    },
+    {
+      "title": "Financial Results for the Quarter Ended 30 June 2025",
+      "date": "Jul 11, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/UBL"
+    },
+    {
+      "title": "Board Meeting Other Than Financial Results",
+      "date": "Dec 10, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/UBL"
+    },
+    {
+      "title": "Notice of Board Meeting and Closed Period for the Period Ended Ended September 30, 2025",
+      "date": "Oct 3, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/UBL"
+    },
+    {
+      "title": "Board Meeting of United Bank Limited (UBL)",
+      "date": "Jul 3, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/UBL"
+    },
+    {
+      "title": "CERTIFIED COPY OF RESOLUTIONS PASSED IN THE EXTRAORDINARY GENERAL MEETING OF UNITED BANK LIMITED",
+      "date": "May 16, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/UBL"
+    },
+    {
+      "title": "Notice of Extra-Ordinary General Meeting (EOGM) of UBL (Prior to Publication)",
+      "date": "Apr 23, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/UBL"
+    }
+  ],
+  "sentiment_score": 0.0,
+  "signal": "NEUTRAL",
+  "signal_simple": "NEUTRAL",
+  "confidence": 0.3,
+  "key_events": [],
+  "price_impact": {
+    "estimate": "unclear",
+    "timeframe": "unclear",
+    "reasoning": "Keyword analysis only"
+  },
+  "summary": "Analysis based on keyword matching (AI unavailable)",
+  "model": "fallback",
+  "analyzed_at": "2026-02-12T04:47:21.152633",
+  "signal_emoji": "\ud83d\udfe1",
+  "cached_at": "2026-02-12T04:47:21.152996"
+}

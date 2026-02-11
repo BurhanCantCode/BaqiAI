@@ -309,7 +309,7 @@ def get_predictions_for_crew() -> Optional[Dict]:
         else:
             direction = "NEUTRAL"
 
-        stocks[symbol] = {
+        stock_entry = {
             "name": SYMBOL_NAME_MAP.get(symbol, symbol),
             "sector": SYMBOL_SECTOR_MAP.get(symbol, "Unknown"),
             "price": data.get("current_price", 0),
@@ -322,5 +322,21 @@ def get_predictions_for_crew() -> Optional[Dict]:
                 "daily_predictions": predictions_21d,
             },
         }
+
+        # Enrich with sentiment data (cached, non-blocking)
+        try:
+            from app.services.psx_engine.sentiment_analyzer import get_stock_sentiment
+            sentiment = get_stock_sentiment(symbol, use_cache=True)
+            stock_entry["sentiment"] = {
+                "score": sentiment.get("sentiment_score", 0),
+                "signal": sentiment.get("signal_simple", "NEUTRAL"),
+                "confidence": sentiment.get("confidence", 0),
+                "news_count": sentiment.get("news_count", 0),
+                "summary": sentiment.get("summary", ""),
+            }
+        except Exception:
+            stock_entry["sentiment"] = None
+
+        stocks[symbol] = stock_entry
 
     return {"stocks": stocks}

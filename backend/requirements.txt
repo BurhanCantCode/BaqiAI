@@ -17,3 +17,4 @@ twilio>=9.0.0
 yfinance>=0.2.40
 pywavelets>=1.7.0
 joblib>=1.4.0
+groq>=0.9.0

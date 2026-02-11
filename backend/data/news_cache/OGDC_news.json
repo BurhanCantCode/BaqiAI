@@ -1,0 +1,76 @@
+{
+  "symbol": "OGDC",
+  "company": "OGDC",
+  "news_count": 9,
+  "news_items": [
+    {
+      "title": "Transmission of Quarterly Report for the Period Ended September 30, 2025",
+      "date": "Oct 30, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/OGDC"
+    },
+    {
+      "title": "Financial Results for the Quarter Ended September 30 2025",
+      "date": "Oct 29, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/OGDC"
+    },
+    {
+      "title": "Transmission of Annual Report for the Year Ended June 30, 2025",
+      "date": "Oct 6, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/OGDC"
+    },
+    {
+      "title": "Financial Results for the Year Ended June 30 2025",
+      "date": "Sep 23, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/OGDC"
+    },
+    {
+      "title": "RESOLUTIONS PASSED BY THE SHAREHOLDERS IN 28th ANNUAL GENERAL MEETING HELD ON OCTOBER 27, 2025",
+      "date": "Oct 27, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/OGDC"
+    },
+    {
+      "title": "Board Meeting and Closed Period",
+      "date": "Oct 22, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/OGDC"
+    },
+    {
+      "title": "Notice of Annual General Meeting",
+      "date": "Oct 3, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/OGDC"
+    },
+    {
+      "title": "Board Meeting",
+      "date": "Sep 16, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/OGDC"
+    },
+    {
+      "title": "CERTIFIED TRUE COPY OF RESOLUTIONS ADOPTED AT EXTRAORDINARY GENERAL MEETING HELD ON SEPTEMBER 10 2025",
+      "date": "Sep 10, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/OGDC"
+    }
+  ],
+  "sentiment_score": 0.0,
+  "signal": "NEUTRAL",
+  "signal_simple": "NEUTRAL",
+  "confidence": 0.3,
+  "key_events": [],
+  "price_impact": {
+    "estimate": "unclear",
+    "timeframe": "unclear",
+    "reasoning": "Keyword analysis only"
+  },
+  "summary": "Analysis based on keyword matching (AI unavailable)",
+  "model": "fallback",
+  "analyzed_at": "2026-02-12T04:46:39.054344",
+  "signal_emoji": "\ud83d\udfe1",
+  "cached_at": "2026-02-12T04:46:39.054916"
+}

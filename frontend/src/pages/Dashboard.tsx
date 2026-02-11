@@ -5,7 +5,6 @@ import { PieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, XAxis, YAxis
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
-import { baqiApi } from '@/api/client'
 import { formatMoney } from '@/lib/utils'
 import { useApp } from '@/context/AppContext'
 import UploadCSV from '@/components/UploadCSV'
@@ -14,9 +13,8 @@ import { TextGenerate } from '@/components/ui/text-generate'
 import { AnimatedCounter } from '@/components/ui/animated-counter'
 import { Meteors } from '@/components/ui/meteors'
 import { GlowingBorder } from '@/components/ui/glowing-border'
-import { MovingBorderButton } from '@/components/ui/moving-border'
 import {
-  TrendingUp, Wallet, PiggyBank, AlertTriangle, Sparkles, ArrowRight, Bot,
+  TrendingUp, Wallet, PiggyBank, AlertTriangle, ArrowRight, Bot,
   Loader2, FileSpreadsheet, Globe
 } from 'lucide-react'
 
@@ -39,9 +37,8 @@ export default function Dashboard() {
   const handleDemo = async () => {
     setDemoLoading(true)
     try {
-      const res = await baqiApi.generateSyntheticData()
-      const newUserId = res.data.user_id
-      switchDataSource('supabase', newUserId)
+      // Load the built-in US transaction data (transactions1 cleaned2.csv)
+      switchDataSource('csv', 1)
     } catch (err) {
       console.error(err)
     } finally {
@@ -97,50 +94,50 @@ export default function Dashboard() {
         >
           <p className="text-xs text-[#8A8878] mb-4 font-medium uppercase tracking-wider">Choose your data source</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* CSV Upload Option */}
+            {/* Existing US Transaction Data — Primary */}
             <SpotlightCard
               className="cursor-pointer group"
               spotlightColor="rgba(163, 181, 112, 0.1)"
             >
-              <div onClick={handleCSVClick}>
-                <div className="w-11 h-11 rounded-xl bg-[#A3B570]/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <FileSpreadsheet className="w-5 h-5 text-[#A3B570]" />
-                </div>
-                <h3 className="font-bold text-lg mb-1 text-[#E8E4DA]">Upload Bank Statement</h3>
-                <p className="text-sm text-[#8A8878] mb-3">
-                  Upload your own CSV bank statement for personalized analysis.
-                </p>
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="bg-[#A3B570]/10 text-[#A3B570] border-[#A3B570]/20 text-xs">Your Data</Badge>
-                  <Badge variant="secondary" className="bg-[#A3B570]/10 text-[#A3B570] border-[#A3B570]/20 text-xs">CSV</Badge>
-                  <Badge variant="secondary" className="bg-[#A3B570]/10 text-[#A3B570] border-[#A3B570]/20 text-xs">Instant</Badge>
-                </div>
-              </div>
-            </SpotlightCard>
-
-            {/* Demo Option */}
-            <SpotlightCard
-              className="cursor-pointer group"
-              spotlightColor="rgba(212, 201, 168, 0.08)"
-            >
               <div onClick={!demoLoading ? handleDemo : undefined}>
-                <div className="w-11 h-11 rounded-xl bg-[#D4C9A8]/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <Globe className="w-5 h-5 text-[#D4C9A8]" />
+                <div className="w-11 h-11 rounded-xl bg-[#A3B570]/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <Globe className="w-5 h-5 text-[#A3B570]" />
                 </div>
-                <h3 className="font-bold text-lg mb-1 text-[#E8E4DA]">Pakistani Demo Data</h3>
+                <h3 className="font-bold text-lg mb-1 text-[#E8E4DA]">US Transaction Data</h3>
                 <p className="text-sm text-[#8A8878] mb-3">
-                  Explore with synthetic transaction data tailored to Pakistani spending patterns.
+                  Analyze 2+ years of real US transaction data with detailed spending patterns.
                 </p>
                 <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="bg-[#D4C9A8]/10 text-[#D4C9A8] border-[#D4C9A8]/20 text-xs">PKR</Badge>
-                  <Badge variant="secondary" className="bg-[#D4C9A8]/10 text-[#D4C9A8] border-[#D4C9A8]/20 text-xs">Demo</Badge>
-                  <Badge variant="secondary" className="bg-[#D4C9A8]/10 text-[#D4C9A8] border-[#D4C9A8]/20 text-xs">~5 sec</Badge>
+                  <Badge variant="secondary" className="bg-[#A3B570]/10 text-[#A3B570] border-[#A3B570]/20 text-xs">USD</Badge>
+                  <Badge variant="secondary" className="bg-[#A3B570]/10 text-[#A3B570] border-[#A3B570]/20 text-xs">2+ Years</Badge>
+                  <Badge variant="secondary" className="bg-[#A3B570]/10 text-[#A3B570] border-[#A3B570]/20 text-xs">Instant</Badge>
                 </div>
                 {demoLoading && (
                   <div className="absolute inset-0 bg-card/90 flex items-center justify-center rounded-2xl z-20">
                     <Loader2 className="w-6 h-6 animate-spin text-[#A3B570]" />
                   </div>
                 )}
+              </div>
+            </SpotlightCard>
+
+            {/* Upload Your Own CSV */}
+            <SpotlightCard
+              className="cursor-pointer group"
+              spotlightColor="rgba(212, 201, 168, 0.08)"
+            >
+              <div onClick={handleCSVClick}>
+                <div className="w-11 h-11 rounded-xl bg-[#D4C9A8]/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <FileSpreadsheet className="w-5 h-5 text-[#D4C9A8]" />
+                </div>
+                <h3 className="font-bold text-lg mb-1 text-[#E8E4DA]">Upload Bank Statement</h3>
+                <p className="text-sm text-[#8A8878] mb-3">
+                  Upload your own CSV bank statement for personalized analysis.
+                </p>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="bg-[#D4C9A8]/10 text-[#D4C9A8] border-[#D4C9A8]/20 text-xs">Your Data</Badge>
+                  <Badge variant="secondary" className="bg-[#D4C9A8]/10 text-[#D4C9A8] border-[#D4C9A8]/20 text-xs">CSV</Badge>
+                  <Badge variant="secondary" className="bg-[#D4C9A8]/10 text-[#D4C9A8] border-[#D4C9A8]/20 text-xs">Custom</Badge>
+                </div>
               </div>
             </SpotlightCard>
           </div>

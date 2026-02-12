@@ -71,7 +71,7 @@ def _get_transactions(user_id: int) -> tuple[list[dict], str]:
     return [], "none"
 
 
-def _build_financial_context(user: dict, analysis: dict, data_exhaust: dict, source: str) -> str:
+def _build_financial_context(user: dict, analysis: dict, data_exhaust: dict, source: str, transactions: list[dict] | None = None) -> str:
     """Build a compact financial context string for Claude's system prompt."""
     currency = "USD" if source == "csv" else "PKR"
     months = len(analysis.get("monthly_breakdown", [])) or 1
@@ -171,6 +171,35 @@ def _build_financial_context(user: dict, analysis: dict, data_exhaust: dict, sou
     except Exception:
         pass
 
+    # Recent transactions (last 14 days) — enables weekly/daily questions
+    if transactions:
+        from datetime import datetime, timedelta
+        cutoff = datetime.now() - timedelta(days=14)
+        recent = []
+        for txn in transactions:
+            date_str = txn.get("date", "")
+            try:
+                txn_date = datetime.strptime(str(date_str)[:10], "%Y-%m-%d")
+                if txn_date >= cutoff:
+                    amt = txn.get("amount", 0)
+                    name = txn.get("name", txn.get("merchant", "Unknown"))
+                    recent.append((txn_date, name, amt))
+            except (ValueError, TypeError):
+                continue
+
+        if recent:
+            recent.sort(key=lambda x: x[0], reverse=True)
+            today = datetime.now()
+            week_start = today - timedelta(days=today.weekday())
+            week_total = sum(abs(r[2]) for r in recent if r[0] >= week_start and r[2] > 0)
+
+            lines.append(f"This Week's Spending So Far: {currency} {week_total:,.2f}")
+            lines.append(f"Recent Transactions (last 14 days, today is {today.strftime('%Y-%m-%d')}):")
+            for txn_date, name, amt in recent[:40]:
+                sign = "+" if amt < 0 else "-"
+                lines.append(f"  {txn_date.strftime('%Y-%m-%d')} | {name} | {sign}{currency} {abs(amt):,.2f}")
+            lines.append("")
+
     return "\n".join(lines)
 
 
@@ -193,7 +222,7 @@ async def process_chat(telegram_id: int, message: str) -> str:
 
     analysis = analyze_transactions(txns)
     data_exhaust = extract_data_exhaust(txns)
-    context = _build_financial_context(user, analysis, data_exhaust, source)
+    context = _build_financial_context(user, analysis, data_exhaust, source, transactions=txns)
 
     # Build system prompt
     system = SYSTEM_PROMPT.format(financial_context=context)

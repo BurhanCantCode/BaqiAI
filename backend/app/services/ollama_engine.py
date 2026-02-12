@@ -1,28 +1,25 @@
-"""Ollama-powered local LLM chat engine for the BAQI AI web app.
+"""Local LLM chat engine for the BAQI AI web app.
 
-Uses the same financial context as the Telegram Claude chat engine,
-but runs entirely locally via Ollama on Apple Silicon.
+Uses Ollama (llama3.1:8b) running locally on Apple Silicon.
 """
 
-import json
 import logging
 from typing import AsyncGenerator
 
 import httpx
 
-from app.database import supabase
-from app.services.spending_analyzer import analyze_transactions, normalize_csv_transactions
-from app.services.insights_engine import parse_csv_transactions, extract_data_exhaust
 from app.services.chat_engine import _get_transactions, _build_financial_context
+from app.services.spending_analyzer import analyze_transactions
+from app.services.insights_engine import extract_data_exhaust
+from app.database import supabase
 
 logger = logging.getLogger(__name__)
 
-OLLAMA_BASE_URL = "http://localhost:11434"
+OLLAMA_URL = "http://localhost:11434"
 OLLAMA_MODEL = "llama3.1:8b"
 
-# In-memory conversation history: user_id -> list of messages
 _web_chat_histories: dict[int, list[dict]] = {}
-_MAX_HISTORY = 20  # 10 turns
+_MAX_HISTORY = 20
 
 SYSTEM_PROMPT = """You are BAQI AI, a witty and encouraging personal financial assistant.
 You specialize in Islamic (Shariah-compliant) finance and help users understand spending, save money, and invest wisely.
@@ -50,13 +47,11 @@ Rules:
 
 
 def _get_user_by_id(user_id: int) -> dict | None:
-    """Look up user by ID."""
     res = supabase.table("users").select("*").eq("id", user_id).execute()
     return res.data[0] if res.data else None
 
 
 def _get_context_and_prompt(user_id: int) -> tuple[str, str] | None:
-    """Build system prompt with financial context. Returns (system_prompt, source) or None."""
     user = _get_user_by_id(user_id)
     if not user:
         user = {"id": user_id, "name": "User", "risk_profile": "not assessed"}
@@ -67,91 +62,77 @@ def _get_context_and_prompt(user_id: int) -> tuple[str, str] | None:
 
     analysis = analyze_transactions(txns)
     data_exhaust = extract_data_exhaust(txns)
-    context = _build_financial_context(user, analysis, data_exhaust, source)
+    context = _build_financial_context(user, analysis, data_exhaust, source, transactions=txns)
     system = SYSTEM_PROMPT.format(financial_context=context)
     return system, source
 
 
 async def check_ollama_status() -> dict:
-    """Check if Ollama is running and has the model available."""
+    """Check if Ollama is running and model is available."""
     try:
         async with httpx.AsyncClient() as client:
-            resp = await client.get(f"{OLLAMA_BASE_URL}/api/tags", timeout=5.0)
+            resp = await client.get(f"{OLLAMA_URL}/api/tags", timeout=5.0)
             if resp.status_code == 200:
-                models = resp.json().get("models", [])
-                model_names = [m.get("name", "") for m in models]
-                has_model = any(OLLAMA_MODEL in name for name in model_names)
+                data = resp.json()
+                models = [m.get("name", "") for m in data.get("models", [])]
+                model_loaded = any(OLLAMA_MODEL in m for m in models)
                 return {
                     "online": True,
                     "model": OLLAMA_MODEL,
-                    "model_loaded": has_model,
-                    "available_models": model_names,
+                    "model_loaded": model_loaded,
+                    "available_models": models,
                 }
     except Exception:
         pass
-    return {"online": False, "model": OLLAMA_MODEL, "model_loaded": False}
+    return {
+        "online": False,
+        "model": OLLAMA_MODEL,
+        "model_loaded": False,
+        "available_models": [],
+    }
 
 
 async def process_ollama_chat(user_id: int, message: str, data_source: str = "csv") -> str:
-    """Process a chat message via Ollama and return the response."""
+    """Process chat via local Ollama."""
     result = _get_context_and_prompt(user_id)
     if not result:
         return "I don't have your spending data yet! Upload a bank statement on the Dashboard first."
 
     system_prompt, source = result
 
-    # Get or create conversation history
     if user_id not in _web_chat_histories:
         _web_chat_histories[user_id] = []
     history = _web_chat_histories[user_id]
 
-    # Add user message
     history.append({"role": "user", "content": message})
-
-    # Trim if too long
     if len(history) > _MAX_HISTORY:
         history[:] = history[-_MAX_HISTORY:]
 
-    # Build messages with system prompt as first message
-    messages = [{"role": "system", "content": system_prompt}] + history
-
     try:
+        ollama_messages = [{"role": "system", "content": system_prompt}] + history
         async with httpx.AsyncClient() as client:
             resp = await client.post(
-                f"{OLLAMA_BASE_URL}/api/chat",
-                json={
-                    "model": OLLAMA_MODEL,
-                    "messages": messages,
-                    "stream": False,
-                },
+                f"{OLLAMA_URL}/api/chat",
+                json={"model": OLLAMA_MODEL, "messages": ollama_messages, "stream": False},
                 timeout=120.0,
             )
             resp.raise_for_status()
-            data = resp.json()
-            reply = data.get("message", {}).get("content", "")
+            reply = resp.json()["message"]["content"]
 
-            if not reply:
-                history.pop()
-                return "Hmm, I got an empty response. Try asking again!"
+        history.append({"role": "assistant", "content": reply})
+        if len(history) > _MAX_HISTORY:
+            history[:] = history[-_MAX_HISTORY:]
 
-            # Store assistant reply
-            history.append({"role": "assistant", "content": reply})
-            if len(history) > _MAX_HISTORY:
-                history[:] = history[-_MAX_HISTORY:]
-
-            return reply
-
-    except httpx.ConnectError:
-        history.pop()
-        return "Ollama is not running! Please start it with `ollama serve` in your terminal."
+        return reply
     except Exception as e:
-        logger.error(f"Ollama chat error: {e}")
-        history.pop()
-        return "Something went wrong with the local AI. Make sure Ollama is running and try again."
+        logger.error(f"Chat error: {e}")
+        if history and history[-1]["role"] == "user":
+            history.pop()
+        return "Oops, something went wrong! Make sure Ollama is running (`ollama serve`)."
 
 
 async def stream_ollama_chat(user_id: int, message: str, data_source: str = "csv") -> AsyncGenerator[str, None]:
-    """Stream a chat response from Ollama token by token."""
+    """Stream chat via local Ollama."""
     result = _get_context_and_prompt(user_id)
     if not result:
         yield "I don't have your spending data yet! Upload a bank statement on the Dashboard first."
@@ -159,47 +140,35 @@ async def stream_ollama_chat(user_id: int, message: str, data_source: str = "csv
 
     system_prompt, source = result
 
-    # Get or create conversation history
     if user_id not in _web_chat_histories:
         _web_chat_histories[user_id] = []
     history = _web_chat_histories[user_id]
 
-    # Add user message
     history.append({"role": "user", "content": message})
     if len(history) > _MAX_HISTORY:
         history[:] = history[-_MAX_HISTORY:]
 
-    messages = [{"role": "system", "content": system_prompt}] + history
     full_response = ""
 
     try:
+        ollama_messages = [{"role": "system", "content": system_prompt}] + history
         async with httpx.AsyncClient() as client:
             async with client.stream(
                 "POST",
-                f"{OLLAMA_BASE_URL}/api/chat",
-                json={
-                    "model": OLLAMA_MODEL,
-                    "messages": messages,
-                    "stream": True,
-                },
+                f"{OLLAMA_URL}/api/chat",
+                json={"model": OLLAMA_MODEL, "messages": ollama_messages, "stream": True},
                 timeout=120.0,
             ) as resp:
                 resp.raise_for_status()
+                import json
                 async for line in resp.aiter_lines():
-                    if not line:
-                        continue
-                    try:
+                    if line.strip():
                         chunk = json.loads(line)
                         token = chunk.get("message", {}).get("content", "")
                         if token:
                             full_response += token
                             yield token
-                        if chunk.get("done"):
-                            break
-                    except json.JSONDecodeError:
-                        continue
 
-        # Store the full response in history
         if full_response:
             history.append({"role": "assistant", "content": full_response})
             if len(history) > _MAX_HISTORY:
@@ -207,22 +176,18 @@ async def stream_ollama_chat(user_id: int, message: str, data_source: str = "csv
         else:
             history.pop()
 
-    except httpx.ConnectError:
-        history.pop()
-        yield "Ollama is not running! Please start it with `ollama serve` in your terminal."
     except Exception as e:
-        logger.error(f"Ollama stream error: {e}")
-        history.pop()
-        yield "Something went wrong with the local AI. Make sure Ollama is running and try again."
+        logger.error(f"Chat stream error: {e}")
+        if history and history[-1]["role"] == "user":
+            history.pop()
+        yield "Oops, something went wrong! Make sure Ollama is running (`ollama serve`)."
 
 
 def get_chat_history(user_id: int) -> list[dict]:
-    """Return conversation history for a user."""
     return _web_chat_histories.get(user_id, [])
 
 
 def clear_chat_history(user_id: int) -> bool:
-    """Clear conversation history for a user."""
     if user_id in _web_chat_histories:
         del _web_chat_histories[user_id]
     return True

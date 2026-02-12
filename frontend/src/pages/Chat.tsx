@@ -14,6 +14,58 @@ import {
 
 const API_URL = import.meta.env.VITE_API_URL || '/api'
 
+function renderMarkdown(text: string) {
+  // Split by newlines first, then process inline markdown
+  return text.split('\n').map((line, i) => {
+    // Process inline markdown: **bold**, *italic*, `code`
+    const parts: (string | JSX.Element)[] = []
+    let remaining = line
+    let key = 0
+
+    while (remaining.length > 0) {
+      // Bold: **text**
+      const boldMatch = remaining.match(/\*\*(.+?)\*\*/)
+      // Italic: *text* (but not **)
+      const italicMatch = remaining.match(/(?<!\*)\*([^*]+?)\*(?!\*)/)
+      // Code: `text`
+      const codeMatch = remaining.match(/`([^`]+?)`/)
+
+      // Find earliest match
+      const matches = [
+        boldMatch ? { m: boldMatch, type: 'bold' as const } : null,
+        italicMatch ? { m: italicMatch, type: 'italic' as const } : null,
+        codeMatch ? { m: codeMatch, type: 'code' as const } : null,
+      ].filter(Boolean).sort((a, b) => a!.m.index! - b!.m.index!)
+
+      if (matches.length === 0) {
+        parts.push(remaining)
+        break
+      }
+
+      const first = matches[0]!
+      const idx = first.m.index!
+      if (idx > 0) parts.push(remaining.slice(0, idx))
+
+      if (first.type === 'bold') {
+        parts.push(<strong key={key++} className="font-semibold text-[#A3B570]">{first.m[1]}</strong>)
+      } else if (first.type === 'italic') {
+        parts.push(<em key={key++}>{first.m[1]}</em>)
+      } else {
+        parts.push(<code key={key++} className="bg-[#333D30] px-1 py-0.5 rounded text-xs">{first.m[1]}</code>)
+      }
+
+      remaining = remaining.slice(idx + first.m[0].length)
+    }
+
+    return (
+      <span key={i}>
+        {i > 0 && <br />}
+        {parts}
+      </span>
+    )
+  })
+}
+
 interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
@@ -249,7 +301,7 @@ export default function Chat() {
                         : 'bg-[#232B22] text-[#E8E4DA] border border-[#333D30]/50'
                     }`}
                   >
-                    {msg.content || (
+                    {msg.content ? renderMarkdown(msg.content) : (
                       <span className="flex items-center gap-2 text-[#8A8878]">
                         <Loader2 className="w-3 h-3 animate-spin" /> Thinking...
                       </span>

@@ -1,0 +1,76 @@
+{
+  "symbol": "SYS",
+  "company": "Systems Limited",
+  "news_count": 9,
+  "news_items": [
+    {
+      "title": "Transmission of Quarterly Report for the Period Ended September 30, 2025",
+      "date": "Oct 29, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/SYS"
+    },
+    {
+      "title": "Financial Results for the Quarter Ended September 30, 2025",
+      "date": "Oct 27, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/SYS"
+    },
+    {
+      "title": "SYS | Systems Limited Transmission of Half Yearly Accounts for the period ended June 30, 2025",
+      "date": "Aug 20, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/SYS"
+    },
+    {
+      "title": "Financial Results for the Quarter Ended 30 June 2025",
+      "date": "Aug 19, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/SYS"
+    },
+    {
+      "title": "SYS | Systems Limited Credit of Final Cash Dividend for the period ended December 31,2024",
+      "date": "May 22, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/SYS"
+    },
+    {
+      "title": "Notice of Extraordinary General Meeting",
+      "date": "Feb 4, 2026",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/SYS"
+    },
+    {
+      "title": "Result of Board Meeting Other Than Financial Results",
+      "date": "Dec 8, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/SYS"
+    },
+    {
+      "title": "Board Meeting Other Than Financial Results",
+      "date": "Nov 28, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/SYS"
+    },
+    {
+      "title": "Notice of 232nd Board Meeting for the Third Quarter ended 30th September 2025",
+      "date": "Oct 17, 2025",
+      "source": "PSX",
+      "url": "https://dps.psx.com.pk/company/SYS"
+    }
+  ],
+  "sentiment_score": 0.15,
+  "signal": "BULLISH",
+  "signal_simple": "BULLISH",
+  "confidence": 0.3,
+  "key_events": [],
+  "price_impact": {
+    "estimate": "unclear",
+    "timeframe": "unclear",
+    "reasoning": "Keyword analysis only"
+  },
+  "summary": "Analysis based on keyword matching (AI unavailable)",
+  "model": "fallback",
+  "analyzed_at": "2026-02-12T04:47:58.491915",
+  "signal_emoji": "\ud83d\udfe2",
+  "cached_at": "2026-02-12T04:47:58.492347"
+}

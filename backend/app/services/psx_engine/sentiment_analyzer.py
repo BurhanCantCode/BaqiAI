@@ -302,44 +302,41 @@ def _fallback_analysis(news_items: List[Dict]) -> Dict:
 # ============================================================================
 
 def get_stock_sentiment(symbol: str, use_cache: bool = True) -> Dict:
-    """Main function: Get AI-powered sentiment for a stock."""
+    """Get sentiment from pre-existing cached news JSON files only."""
     symbol = symbol.upper()
     company_names = STOCK_COMPANIES.get(symbol, (symbol,))
     company_name = company_names[0]
 
     logger.info(f"Sentiment analysis: {symbol} ({company_name})")
 
-    # Check cache
-    if use_cache:
-        cached = _load_cached_news(symbol)
-        if cached:
-            logger.info(f"Using cached sentiment for {symbol}")
+    # Only read from existing cache files — no live fetching
+    cache_path = _get_cache_path(symbol)
+    if cache_path.exists():
+        try:
+            with open(cache_path, 'r') as f:
+                cached = json.load(f)
+            logger.info(f"Loaded cached sentiment for {symbol} ({cached.get('news_count', 0)} news items)")
             return cached
+        except Exception as e:
+            logger.error(f"Failed to read cache for {symbol}: {e}")
 
-    # Fetch news
-    news_items = fetch_all_news(symbol)
-    logger.info(f"Found {len(news_items)} news items for {symbol}")
-
-    # AI analysis
-    analysis = _analyze_with_ai(symbol, company_name, news_items)
-
-    # Build result
-    result = {
+    # No cache file exists — return neutral placeholder
+    return {
         'symbol': symbol,
         'company': company_name,
-        'news_count': len(news_items),
-        'news_items': news_items[:15],
-        **analysis
+        'news_count': 0,
+        'news_items': [],
+        'sentiment_score': 0.0,
+        'signal': 'NEUTRAL',
+        'signal_simple': 'NEUTRAL',
+        'confidence': 0.0,
+        'key_events': [],
+        'price_impact': {'estimate': 'unclear', 'timeframe': 'unclear', 'reasoning': 'No cached news available'},
+        'summary': 'No cached news data available for this stock',
+        'model': 'cache-only',
+        'analyzed_at': datetime.now().isoformat(),
+        'signal_emoji': '🟡',
     }
-
-    # Signal emoji
-    signal = result.get('signal_simple', 'NEUTRAL')
-    result['signal_emoji'] = {'BULLISH': '🟢', 'BEARISH': '🔴'}.get(signal, '🟡')
-
-    # Cache
-    _save_to_cache(symbol, result)
-
-    return result
 
 
 def get_sentiment_score_for_model(symbol: str, use_cache: bool = True) -> Dict:

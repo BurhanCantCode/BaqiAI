@@ -14,7 +14,8 @@ from app.services.psx_prediction_service import (
     run_predictions_for_all_sectors,
     PREDICTION_ORDER,
 )
-from app.services.psx_engine.sentiment_analyzer import get_stock_sentiment
+from app.services.psx_engine.sentiment_analyzer import get_stock_sentiment, STOCK_COMPANIES
+from app.services.psx_engine.sentiment_model import get_rigorous_adjustment, apply_adjustments_to_predictions
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["psx"])
@@ -147,6 +148,58 @@ async def get_sentiment(symbol: str, use_cache: bool = True):
     except Exception as e:
         logger.error(f"Sentiment analysis failed for {symbol}: {e}")
         raise HTTPException(status_code=500, detail=f"Sentiment analysis failed: {str(e)}")
+
+
+@router.get("/psx/sentiment-adjusted/{symbol}")
+async def get_sentiment_adjusted_predictions(symbol: str):
+    """
+    Get ML predictions adjusted by sentiment analysis.
+    Combines base ML predictions with mathematically rigorous sentiment adjustments.
+    """
+    symbol = symbol.upper()
+
+    # Get base predictions
+    predictions = get_predictions_for_crew()
+    if not predictions or symbol not in predictions.get("stocks", {}):
+        raise HTTPException(status_code=404, detail=f"No predictions available for {symbol}")
+
+    stock_data = predictions["stocks"][symbol]
+    base_preds = stock_data.get("daily_predictions", [])
+
+    # Get sentiment
+    try:
+        sentiment = get_stock_sentiment(symbol, use_cache=True)
+    except Exception as e:
+        logger.warning(f"Sentiment unavailable for {symbol}: {e}")
+        return {
+            "symbol": symbol,
+            "predictions": base_preds,
+            "sentiment_available": False,
+            "note": "Sentiment analysis unavailable, returning base ML predictions",
+        }
+
+    # Calculate adjustments
+    adjustment = get_rigorous_adjustment(sentiment, prediction_days=21)
+
+    # Apply to predictions
+    adjusted_preds = apply_adjustments_to_predictions(base_preds, adjustment["adjustments"])
+
+    return {
+        "symbol": symbol,
+        "company": sentiment.get("company", symbol),
+        "predictions": adjusted_preds,
+        "sentiment": {
+            "score": sentiment.get("sentiment_score", 0),
+            "signal": sentiment.get("signal_simple", "NEUTRAL"),
+            "signal_emoji": sentiment.get("signal_emoji", "🟡"),
+            "confidence": sentiment.get("confidence", 0),
+            "news_count": sentiment.get("news_count", 0),
+            "summary": sentiment.get("summary", ""),
+            "key_events": sentiment.get("key_events", []),
+        },
+        "adjustment_summary": adjustment["summary"],
+        "sentiment_available": True,
+    }
 
 
 @router.get("/psx/sentiment-all")

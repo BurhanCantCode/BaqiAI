@@ -170,7 +170,7 @@ async def send_weekly_report(user_id: int):
         from app.services.telegram_bot import send_message
         await send_message(
             int(telegram_id),
-            "📊 *Weekly Report*\n\nNo spending recorded in the last 7 days. Quiet week!",
+            "*Weekly Report*\n\nNo spending recorded in the last 7 days. Quiet week!",
         )
         return {"success": True, "report": "No spending in last 7 days", "telegram_id": telegram_id}
 
@@ -184,13 +184,11 @@ async def send_weekly_report(user_id: int):
 
     # Weekly category breakdown
     categories = []
-    cat_emojis = {"fixed": "🏠", "discretionary": "🛒", "watery": "💧"}
     for cat_name in ["fixed", "discretionary", "watery"]:
         cat = weekly.get(cat_name, {})
         if cat.get("total", 0) > 0:
-            emoji = cat_emojis.get(cat_name, "📊")
             categories.append(
-                f"{emoji} *{cat_name.title()}*: {currency} {cat['total']:,.0f} ({cat['percentage']:.0f}%)"
+                f"*{cat_name.title()}*: {currency} {cat['total']:,.0f} ({cat['percentage']:.0f}%)"
             )
 
     # Top merchants this week
@@ -205,11 +203,11 @@ async def send_weekly_report(user_id: int):
 
     # Trend indicator
     if weekly_vs_avg > 15:
-        trend = f"📈 *{weekly_vs_avg:+.0f}%* vs your weekly average — spending up!"
+        trend = f"*{weekly_vs_avg:+.0f}%* vs your weekly average — spending up!"
     elif weekly_vs_avg < -15:
-        trend = f"📉 *{weekly_vs_avg:+.0f}%* vs your weekly average — nice savings!"
+        trend = f"*{weekly_vs_avg:+.0f}%* vs your weekly average — nice savings!"
     else:
-        trend = f"➡️ *{weekly_vs_avg:+.0f}%* vs your weekly average — on track"
+        trend = f"*{weekly_vs_avg:+.0f}%* vs your weekly average — on track"
 
     # Contextual tip based on this week
     watery_total = weekly.get("watery", {}).get("total", 0)
@@ -223,15 +221,15 @@ async def send_weekly_report(user_id: int):
         tip = "Steady week. Keep this pace and your BAQI surplus will grow nicely."
 
     report = (
-        f"📊 *Your Weekly BAQI Report*\n"
+        f"*Your Weekly BAQI Report*\n"
         f"_Last 7 days_\n\n"
-        f"💰 *Spent This Week:* {currency} {week_spent:,.0f}\n"
-        f"📊 *Weekly Average:* {currency} {avg_weekly_spend:,.0f}\n"
+        f"*Spent This Week:* {currency} {week_spent:,.0f}\n"
+        f"*Weekly Average:* {currency} {avg_weekly_spend:,.0f}\n"
         f"{trend}\n\n"
-        f"*This Week's Breakdown:*\n" +
-        "\n".join(categories) +
-        f"\n\n*Top Merchants This Week:*\n{top_merchants}\n\n"
-        f"💡 *Tip:* {tip}\n\n"
+        f"*This Week's Breakdown:*\n"
+        + "\n".join(categories)
+        + f"\n\n*Top Merchants This Week:*\n{top_merchants}\n\n"
+        f"*Tip:* {tip}\n\n"
         f"_Your BAQI AI Weekly Digest_"
     )
 

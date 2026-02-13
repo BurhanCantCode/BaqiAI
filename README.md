@@ -1,4 +1,4 @@
-# 🌙 BAQI AI - Your Islamic Investment Intelligence Platform
+# BAQI AI - Your Investment Intelligence Platform
 
 > **Winner Submission for JS Bank PROCOM '26 - AI in Banking**
 
@@ -6,7 +6,7 @@ Transform your bank statement into personalized, Shariah-compliant investment re
 
 ---
 
-## 🎯 The Problem We Solve
+## The Problem We Solve
 
 **78% of Pakistanis don't invest** because they don't know:
 - How much money they can actually afford to invest (*baqi* = leftover)
@@ -17,9 +17,9 @@ Transform your bank statement into personalized, Shariah-compliant investment re
 
 ---
 
-## 💡 How It Works: The AI Journey
+## How It Works: The AI Journey
 
-### 1️⃣ **Data Exhaust Analysis** - Understanding WHO You Are
+### 1. **Data Exhaust Analysis** - Understanding WHO You Are
 
 Your bank statement reveals more about you than you realize. Our **Data Exhaust Engine** powered by **Claude Sonnet 4** analyzes:
 
@@ -41,16 +41,16 @@ Your bank statement reveals more about you than you realize. Our **Data Exhaust 
 
 Our **Spending Analyzer** uses intelligent rule-based classification to categorize every transaction:
 
-#### 🏠 **Fixed Costs** (Must Pay)
+#### **Fixed Costs** (Must Pay)
 - Rent, utilities, loan payments, insurance
 - Recurring subscriptions (Netflix, Spotify)
 - **Cannot be reduced** - these are obligations
 
-#### 🛒 **Discretionary Spending** (Necessary but Variable)
+#### **Discretionary Spending** (Necessary but Variable)
 - Groceries, transport, healthcare
 - **Can be optimized** - shop smarter, not less
 
-#### 💧 **Watery Spending** (Money Leaks)
+#### **Watery Spending** (Money Leaks)
 - Food delivery, impulse shopping, entertainment
 - **High reduction potential** - this is where your investment money is hiding
 
@@ -68,17 +68,17 @@ Potential BAQI = BAQI + (50% of Watery Spending)
 
 ---
 
-### 3️⃣ **5-Agent AI Orchestra** - Building Your Portfolio
+### 3. **5-Agent AI Orchestra** - Building Your Portfolio
 
 Once we know your BAQI, **5 specialized AI agents collaborate sequentially** to build your personalized investment strategy:
 
-#### 🤖 **Agent 1: Spending Pattern Analyst**
+#### **Agent 1: Spending Pattern Analyst**
 - **Role**: Deep-dive into transaction history
 - **Tools**: `TransactionQueryTool` (queries Supabase database)
 - **Output**: Spending breakdown, top reduction opportunities, monthly BAQI calculation
 - **Why Sequential**: Feeds spending insights to Risk Profiler
 
-#### 🛡️ **Agent 2: Risk Assessment Specialist**
+#### **Agent 2: Risk Assessment Specialist**
 - **Role**: Determine investment risk tolerance
 - **Input**: Age, income, quiz answers, spending patterns from Agent 1
 - **Algorithm**: 
@@ -91,12 +91,12 @@ Once we know your BAQI, **5 specialized AI agents collaborate sequentially** to 
   - Moderate: 40% equity, 30% fixed income, 30% mutual funds
   - Aggressive: 60% equity, 10% fixed income, 30% mutual funds
 
-#### 📈 **Agent 3: Market Sentiment Analyzer**
+#### **Agent 3: Market Sentiment Analyzer**
 - **Role**: Analyze PSX market conditions using our **proprietary ML prediction engine**
 - **Input**: Real-time PSX data from our advanced forecasting system
 - **Output**: Market outlook (bullish/neutral/bearish), top sectors, risk flags, opportunities
 
-#### 🌙 **Agent 4: Shariah Compliance Officer**
+#### **Agent 4: Shariah Compliance Officer**
 - **Role**: Screen all stocks for Islamic compliance
 - **Tools**: `HalalScreeningTool` (KMI-30 index + Meezan Bank criteria)
 - **Screening Criteria**:
@@ -105,7 +105,7 @@ Once we know your BAQI, **5 specialized AI agents collaborate sequentially** to 
   - Haram revenue < 5%
 - **Output**: Halal-certified stock list with compliance reasoning
 
-#### 💼 **Agent 5: Investment Strategist**
+#### **Agent 5: Investment Strategist**
 - **Role**: Construct final portfolio using all agent insights
 - **Tools**: `PSXPredictionTool` (accesses our ML engine)
 - **Input**: BAQI amount, risk profile, market outlook, halal stocks, **21-day ML predictions**
@@ -119,11 +119,11 @@ Once we know your BAQI, **5 specialized AI agents collaborate sequentially** to 
 
 ---
 
-### 4️⃣ **PSX Prediction Engine** - The Secret Weapon 🚀
+### 4. **PSX Prediction Engine** - The Secret Weapon
 
 This is where BAQI AI becomes truly sophisticated. Our **21-Day Stock Forecasting System** is built on **peer-reviewed research** and achieves **85% directional accuracy**.
 
-#### 🔬 **Research-Backed ML Architecture**
+#### **Research-Backed ML Architecture**
 
 **Ensemble Model** (weighted voting):
 - **SVM with RBF Kernel** (35% weight) - 85% accuracy on PSX per research
@@ -136,7 +136,7 @@ This is where BAQI AI becomes truly sophisticated. Our **21-Day Stock Forecastin
 - Tree models (Random Forest, XGBoost) only achieve ~53% on emerging markets
 - Ensemble reduces overfitting and captures different market patterns
 
-#### 📊 **Advanced Feature Engineering**
+#### **Advanced Feature Engineering**
 
 **External Features** (Most Critical):
 1. **USD/PKR Exchange Rate** - #1 predictor for PSX per research
@@ -169,7 +169,7 @@ This is where BAQI AI becomes truly sophisticated. Our **21-Day Stock Forecastin
 3. **Seasonal Features** - Ramadan effect, quarter-end patterns
 4. **Feature Scaling** - StandardScaler normalization
 
-#### 🎯 **Iterated Forecasting with Confidence Decay**
+#### **Iterated Forecasting with Confidence Decay**
 
 Instead of direct 21-day prediction (prone to error), we use **iterated forecasting**:
 
@@ -187,7 +187,7 @@ Day 1 prediction → Update features → Day 2 prediction → ... → Day 21
 - Max total return: ±50% over horizon
 - Mean reversion to historical volatility
 
-#### 🗄️ **3-Tier Fallback System**
+#### **3-Tier Fallback System**
 
 1. **Live ML Cache** - Fresh predictions (< 24 hours old)
 2. **Seed Data** - Pre-computed predictions for 5 sectors
@@ -200,7 +200,7 @@ Day 1 prediction → Update features → Day 2 prediction → ... → Day 21
 - 🏦 Banking (UBL - United Bank)
 - 💻 Technology (SYS - Systems Limited)
 
-#### 📈 **Prediction Stability Layer**
+#### **Prediction Stability Layer**
 
 **Hysteresis Algorithm** prevents flip-flopping:
 - Requires +7% to flip TO BULLISH
@@ -242,7 +242,7 @@ After agents generate your recommendation:
 
 ---
 
-## 🏗️ Technical Architecture
+## Technical Architecture
 
 ### Backend Stack
 - **FastAPI** - High-performance async API
@@ -269,7 +269,21 @@ After agents generate your recommendation:
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
+
+## Visual Overview
+
+![Dashboard Overview](dashboard1.png)
+
+![Dashboard Analysis](dashboard2.png)
+
+![Dashboard Detailed View](dashboard3.png)
+
+![Dashboard Portfolio View](dashboard4.png)
+
+![Telegram Bot View](telegram.png)
+
+![Telegram Bot View 2](telegram2.png)
 
 ### Backend Setup
 ```bash
@@ -297,7 +311,7 @@ npm run dev
 
 ---
 
-## 🎬 Demo Flow (For Judges)
+## Demo Flow (For Judges)
 
 ### 1. **Dashboard** - Choose Data Source
 - Upload CSV/PDF bank statement (Claude AI extracts transactions)
@@ -336,7 +350,7 @@ npm run dev
 
 ---
 
-## 🎯 Key Differentiators
+## Key Differentiators
 
 ### 1. **Data Exhaust Intelligence**
 Most apps analyze transactions. We analyze **the person behind the transactions**.
@@ -358,7 +372,7 @@ From bank statement upload to portfolio execution - **fully automated in 60 seco
 
 ---
 
-## 📊 System Capabilities
+## System Capabilities
 
 - ✅ **CSV/PDF Upload** - Any bank format (Claude AI parsing)
 - ✅ **3,000+ Transaction Analysis** - Real data exhaust extraction
@@ -371,7 +385,7 @@ From bank statement upload to portfolio execution - **fully automated in 60 seco
 
 ---
 
-## 🏆 Why BAQI AI Wins
+## Why BAQI AI Wins
 
 ### For Users
 - **No financial expertise required** - AI does the analysis
@@ -393,7 +407,7 @@ From bank statement upload to portfolio execution - **fully automated in 60 seco
 
 ---
 
-## 📝 Future Enhancements
+## Future Enhancements
 
 - [ ] **Real-time PSX execution** - Connect to brokerage APIs
 - [ ] **WhatsApp integration** - Broader reach than Telegram
@@ -405,16 +419,16 @@ From bank statement upload to portfolio execution - **fully automated in 60 seco
 
 ---
 
-## 👥 Team
+## Team
 
-Built with ❤️ for JS Bank PROCOM '26 Hackathon
+Built for JS Bank PROCOM '26 Hackathon
 
 ---
 
-## 📄 License
+## License
 
 MIT License - See LICENSE file for details
 
 ---
 
-**BAQI AI** - Because your bank statement knows you better than you know yourself. 🌙
+**BAQI AI** - Because your bank statement knows you better than you know yourself.

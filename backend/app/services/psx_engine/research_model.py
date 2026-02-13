@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🔬 RESEARCH-BACKED PSX PREDICTION MODEL
+RESEARCH-BACKED PSX PREDICTION MODEL
 Based on peer-reviewed literature (2020-2025) specifically for KSE-100/PSX.
 
 Key research findings implemented:
@@ -155,7 +155,7 @@ class ResearchBackedEnsemble:
         """
         if verbose:
             print("=" * 60)
-            print("🔬 TRAINING RESEARCH-BACKED ENSEMBLE")
+            print("TRAINING RESEARCH-BACKED ENSEMBLE")
             print("=" * 60)
         
         # Scale features
@@ -186,7 +186,7 @@ class ResearchBackedEnsemble:
         # Average accuracy per model
         avg_scores = {}
         if verbose:
-            print("\n📊 Model Performance (Trend Accuracy):")
+            print("\nModel Performance (Trend Accuracy):")
         for name, scores in validation_scores.items():
             avg_scores[name] = np.mean(scores)
             if verbose:

@@ -218,12 +218,12 @@ async def cmd_balance(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
     monthly_watery_potential = round(analysis["watery_savings_potential"] / months)
 
     await update.message.reply_text(
-        f"💰 *Your Monthly Financial Summary*\n\n"
-        f"📥 Avg Monthly Income: {currency} {monthly_income:,}\n"
-        f"📤 Avg Monthly Spending: {currency} {monthly_spending:,}\n"
-        f"📈 Savings Rate: {analysis['savings_rate']:.1f}%\n\n"
-        f"✅ *Your BAQI (investable surplus): {currency} {monthly_baqi:,}/month*\n\n"
-        f"💡 Potential extra savings: {currency} {monthly_watery_potential:,}/month "
+        f"*Your Monthly Financial Summary*\n\n"
+        f"Average Monthly Income: {currency} {monthly_income:,}\n"
+        f"Average Monthly Spending: {currency} {monthly_spending:,}\n"
+        f"Savings Rate: {analysis['savings_rate']:.1f}%\n\n"
+        f"*Your BAQI (investable surplus): {currency} {monthly_baqi:,}/month*\n\n"
+        f"Potential extra savings: {currency} {monthly_watery_potential:,}/month "
         f"by reducing discretionary spending by 50%",
         parse_mode="Markdown",
     )
@@ -258,15 +258,15 @@ async def cmd_spending(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
         return round(analysis[cat]["total"] / months)
 
     await update.message.reply_text(
-        f"📊 *Monthly Spending Breakdown*\n\n"
-        f"🏠 *Fixed:* {analysis['fixed']['percentage']:.1f}% (~{currency} {_monthly('fixed'):,}/mo)\n"
+        f"*Monthly Spending Breakdown*\n\n"
+        f"*Fixed:* {analysis['fixed']['percentage']:.1f}% (~{currency} {_monthly('fixed'):,}/mo)\n"
         f"{_top(analysis['fixed']['items'])}\n\n"
-        f"🛒 *Discretionary:* {analysis['discretionary']['percentage']:.1f}% (~{currency} {_monthly('discretionary'):,}/mo)\n"
+        f"*Discretionary:* {analysis['discretionary']['percentage']:.1f}% (~{currency} {_monthly('discretionary'):,}/mo)\n"
         f"{_top(analysis['discretionary']['items'])}\n\n"
-        f"💧 *Watery (reducible):* {analysis['watery']['percentage']:.1f}% (~{currency} {_monthly('watery'):,}/mo)\n"
+        f"*Watery (reducible):* {analysis['watery']['percentage']:.1f}% (~{currency} {_monthly('watery'):,}/mo)\n"
         f"{_top(analysis['watery']['items'])}\n\n"
         f"{'─' * 24}\n"
-        f"🔔 *Spending Alerts*\n\n{alerts}",
+        f"*Spending Alerts*\n\n{alerts}",
         parse_mode="Markdown",
     )
 
@@ -308,21 +308,21 @@ async def cmd_insights(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
         last_two = monthly[-2:]
         if last_two[1]["spending"] > last_two[0]["spending"]:
             diff = last_two[1]["spending"] - last_two[0]["spending"]
-            trend = f"\n📈 Spending *increased* by {currency} {diff:,.0f} vs last month."
+            trend = f"\nSpending *increased* by {currency} {diff:,.0f} vs last month."
         else:
             diff = last_two[0]["spending"] - last_two[1]["spending"]
-            trend = f"\n📉 Spending *decreased* by {currency} {diff:,.0f} vs last month. Keep it up!"
+            trend = f"\nSpending *decreased* by {currency} {diff:,.0f} vs last month. Keep it up!"
 
     await update.message.reply_text(
-        f"🧠 *AI Financial Insights*\n\n"
+        f"*AI Financial Insights*\n\n"
         f"{persona}\n"
-        f"💡 {tip}\n\n"
-        f"📊 *Key Numbers:*\n"
+        f"Tip: {tip}\n\n"
+        f"*Key Numbers:*\n"
         f"  • Savings rate: {savings_rate:.1f}%\n"
         f"  • Reducible spending: {watery_pct:.1f}%\n"
         f"  • Monthly investable: {currency} {monthly_baqi:,.0f}\n"
         f"{trend}\n\n"
-        f"💎 For full AI-powered recommendations with 6 specialized agents, "
+        f"For full AI-powered recommendations with 6 specialized agents, "
         f"visit the BAQI AI web dashboard!",
         parse_mode="Markdown",
     )

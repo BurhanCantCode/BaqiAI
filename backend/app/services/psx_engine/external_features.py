@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-📊 EXTERNAL FEATURES MODULE
+EXTERNAL FEATURES MODULE
 Research-backed external data for PSX prediction model.
 
 Per peer-reviewed research (2020-2025):
@@ -34,7 +34,7 @@ try:
     YFINANCE_AVAILABLE = True
 except ImportError:
     YFINANCE_AVAILABLE = False
-    print("⚠️ yfinance not installed. Run: pip install yfinance")
+    print("yfinance not installed. Run: pip install yfinance")
 
 
 # ============================================================================
@@ -73,7 +73,7 @@ def fetch_usd_pkr(start_date: str = None, end_date: str = None,
         usdpkr_volatility, usdpkr_trend
     """
     if not YFINANCE_AVAILABLE:
-        print("⚠️ yfinance not available, returning empty DataFrame")
+        print("yfinance not available, returning empty DataFrame")
         return pd.DataFrame()
     
     try:
@@ -83,7 +83,7 @@ def fetch_usd_pkr(start_date: str = None, end_date: str = None,
             data = yf.download('PKR=X', period=period, progress=False)
         
         if data.empty:
-            print("⚠️ No USD/PKR data returned")
+            print("No USD/PKR data returned")
             return pd.DataFrame()
         
         # Handle multi-level columns from yfinance
@@ -102,11 +102,11 @@ def fetch_usd_pkr(start_date: str = None, end_date: str = None,
         })
         
         df = df.reset_index(drop=True)
-        print(f"✅ Fetched {len(df)} USD/PKR data points")
+        print(f"Fetched {len(df)} USD/PKR data points")
         return df
         
     except Exception as e:
-        print(f"❌ Error fetching USD/PKR: {e}")
+        print(f"Error fetching USD/PKR: {e}")
         return pd.DataFrame()
 
 
@@ -190,7 +190,7 @@ def fetch_kse100(start_year: int = 2020, end_date: str = None) -> pd.DataFrame:
             all_data.extend(month_data)
     
     if not all_data:
-        print("⚠️ No KSE-100 data fetched")
+        print("No KSE-100 data fetched")
         return pd.DataFrame()
     
     df = pd.DataFrame(all_data)
@@ -204,7 +204,7 @@ def fetch_kse100(start_year: int = 2020, end_date: str = None) -> pd.DataFrame:
     df['kse100_above_sma50'] = (df['kse100_close'] > df['kse100_close'].rolling(50).mean()).astype(int)
     df['kse100_above_sma200'] = (df['kse100_close'] > df['kse100_close'].rolling(200).mean()).astype(int)
     
-    print(f"✅ Fetched {len(df)} KSE-100 data points ({df['date'].min().date()} to {df['date'].max().date()})")
+    print(f"Fetched {len(df)} KSE-100 data points ({df['date'].min().date()} to {df['date'].max().date()})")
     return df
 
 
@@ -256,7 +256,7 @@ def fetch_commodities(start_date: str = None, end_date: str = None,
             result['gold_trend'] = (gold_aligned['Close'] / gold_aligned['Close'].shift(20) - 1).values
         
         result = result.reset_index(drop=True)
-        print(f"✅ Fetched {len(result)} commodity data points")
+        print(f"Fetched {len(result)} commodity data points")
         return result
         
     except Exception as e:

@@ -160,7 +160,7 @@ def _handle_registered(conv: dict, phone: str, msg: str) -> str:
     elif msg in ("3", "recommend", "recommendation", "invest"):
         conv["state"] = "RECOMMENDATION_READY"
         return (
-            "🤖 To generate your personalized AI recommendation, "
+            "To generate your personalized AI recommendation, "
             "please use our web dashboard or API.\n\n"
             f"POST /api/recommendations/generate with user_id: {user_id}\n\n"
             "The AI pipeline takes 30-90 seconds and uses 6 specialized agents:\n"
